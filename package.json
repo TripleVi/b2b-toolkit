@@ -1,0 +1,19 @@
+{
+  "name": "b2b-toolkit",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-html": "^8.1.4",
+    "prettier": "^3.8.3",
+    "vite": "^8.0.11",
+    "vite-plugin-monkey": "^8.0.0"
+  }
+}

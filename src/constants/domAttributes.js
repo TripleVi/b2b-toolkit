@@ -1,0 +1,16 @@
+export const DOM_ATTRS = {
+  PRODUCT_ID: 'bss-b2b-product-id',
+  PRODUCT_PRICE: 'bss-b2b-product-price',
+  PRODUCT_QB_ID: 'bss-b2b-product-qb-id',
+  VARIANT_ID: 'bss-b2b-variant-id',
+  VARIANT_PRICE: 'bss-b2b-variant-price',
+  COLLECTION_ELEMENT: 'bss-b2b-collection-element',
+  MAIN_PRODUCT_FORM: 'bss-b2b-main-product-form',
+  PRODUCT_FORM: 'bss-b2b-product-form',
+  PRODUCT_FORM_ID: 'bss-b2b-product-form-id',
+  QUICKVIEW_BTN: 'bss-b2b-quickview-btn',
+  SEARCHBAR_OBSERVER_ID: 'bss-b2b-searchbar-observer-id',
+  CART_ITEM_KEY: 'bss-b2b-cart-item-key',
+  CART_ITEM_ORIGINAL_PRICE: 'bss-b2b-item-original-price',
+  CART_FINAL_LINE_PRICE: 'bss-b2b-final-line-price',
+};
