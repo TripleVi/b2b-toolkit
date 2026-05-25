@@ -1,19 +1,22 @@
+import { config } from '../config/index.js';
 import { DOM_ATTRS } from '../constants/domAttributes';
 import { UI_CONTEXT } from '../constants/ui';
 import { getAppliedRules, getAvailableRules } from './b2b';
 import { getCartSelectors, getProductSelectors } from './selectors';
-import { handleElementBadge, highlightEls, isHighlighted, unhighlightEls } from './uiElements';
-import { config } from '../config/index.js';
+import {
+  handleElementBadge,
+  highlightEls,
+  isHighlighted,
+  unhighlightEls,
+} from './uiElements';
 
-export function highlightSearch() {
-  if (!config.get('search.highlightElements')) return;
-
+// export function highlightSearch() {
+export function handleSearch() {
   const searchContainers = document.querySelectorAll(
     `[${DOM_ATTRS.SEARCHBAR_OBSERVER_ID}]`
   );
-  searchContainers.forEach(container => {
-    highlightEls([container]);
 
+  searchContainers.forEach(container => {
     const searchId = container.getAttribute(DOM_ATTRS.SEARCHBAR_OBSERVER_ID);
     const searchBar = BSS_B2B.support.search[searchId] ?? {
       target: container,
@@ -21,14 +24,12 @@ export function highlightSearch() {
     };
 
     for (const [key, card] of Object.entries(searchBar.cards)) {
-      if (card.target.isConnected && isHighlighted(card.target)) continue;
+      if (card.target.isConnected && isHandled(card.target)) continue;
       delete searchBar.cards[key];
     }
 
-    const cardEls = container.querySelectorAll(
-      `[${DOM_ATTRS.PRODUCT_QB_ID}]:not(.highlight)`
-    );
-    const cards = highlightProductCards({
+    const cardEls = queryUnhandled(`[${DOM_ATTRS.PRODUCT_QB_ID}]`, container);
+    const cards = handleProductCards({
       cardEls,
       uiContext: UI_CONTEXT.SEARCH,
     });
@@ -36,34 +37,35 @@ export function highlightSearch() {
     searchBar.cards = { ...searchBar.cards, ...cards };
     BSS_B2B.support.search[searchId] = searchBar;
   });
+
+  highlightSearch(true);
 }
 
-export function highlightCollection() {
-  if (!config.get('collection.highlightElements')) return;
-
+export function handleCollection() {
   const collection = BSS_B2B.support.collection;
 
   for (const [key, card] of Object.entries(collection)) {
-    if (card.target.isConnected && isHighlighted(card.target)) continue;
+    if (card.target.isConnected && isHandled(card.target)) continue;
     delete collection[key];
   }
 
-  const cardEls = document.querySelectorAll(
-    `[${DOM_ATTRS.PRODUCT_QB_ID}]:not(.highlight)`
-  );
-  const cards = highlightProductCards({
+  const cardEls = queryUnhandled(`[${DOM_ATTRS.PRODUCT_QB_ID}]`);
+  const cards = handleProductCards({
     cardEls,
     uiContext: UI_CONTEXT.COLLECTION,
   });
 
   BSS_B2B.support.collection = { ...collection, ...cards };
+  highlightCollection(true);
 }
 
-export function highlightProductCards({ cardEls, uiContext }) {
+export function handleProductCards({ cardEls, uiContext }) {
   const cards = {};
   const notFoundProducts = [];
   cardEls.forEach(cardEl => {
-    if (!cardEl.isConnected || isHighlighted(cardEl)) return;
+    if (!cardEl.isConnected || isHandled(cardEl)) return;
+
+    markAsHandled(cardEl);
 
     const id = +cardEl.getAttribute(DOM_ATTRS.PRODUCT_QB_ID);
     const product = BSS_B2B.storage.productStorage.get(id);
@@ -73,14 +75,12 @@ export function highlightProductCards({ cardEls, uiContext }) {
     }
 
     setUIContext(cardEl, uiContext);
-    highlightEls([cardEl]);
 
     const priceEls = [
       ...cardEl.querySelectorAll(
         `[${DOM_ATTRS.PRODUCT_PRICE}][${DOM_ATTRS.PRODUCT_ID}="${id}"]`
       ),
     ];
-    highlightEls(priceEls, UI_CONTEXT.PRODUCT_PRICE);
 
     let currVariantId = product?.currentVariant?.id;
 
@@ -95,7 +95,6 @@ export function highlightProductCards({ cardEls, uiContext }) {
     const quickViewBtns = [
       ...cardEl.querySelectorAll(`[${DOM_ATTRS.QUICKVIEW_BTN}]`),
     ];
-    highlightEls(quickViewBtns);
 
     cards[currVariantId] = {
       target: cardEl,
@@ -124,9 +123,7 @@ export function highlightProductCards({ cardEls, uiContext }) {
   return cards;
 }
 
-export function highlightForms(formIds) {
-  if (!config.get('form.highlightElements')) return;
-
+export function handleForms(formIds) {
   const forms = BSS_B2B.support.forms;
   const productSelectors = getProductSelectors();
 
@@ -134,7 +131,7 @@ export function highlightForms(formIds) {
     for (const [formId, locationForm] of Object.entries(locationForms)) {
       if (
         !locationForm.target.isConnected ||
-        !isHighlighted(locationForm.target)
+        !isHandled(locationForm.target)
       )
         delete locationForms[formId];
     }
@@ -149,6 +146,8 @@ export function highlightForms(formIds) {
       `[${DOM_ATTRS.PRODUCT_FORM_ID}="${formId}"]`
     );
     if (!formEl?.isConnected) return;
+
+    markAsHandled(formEl);
 
     const productForm = BSS_B2B.storage.productFormStorage.get(formId);
     if (!productForm) {
@@ -167,12 +166,9 @@ export function highlightForms(formIds) {
 
     const location = productForm.location;
 
-    // setUIContext(formEl, UI_CONTEXT.PRODUCT_PAGE);
-
     const availableRules = getAvailableRules({ formId });
     const appliedRules = getAppliedRules({ formId });
 
-    highlightEls([formEl]);
     handleElementBadge({
       container: formEl,
       productId: productForm.id,
@@ -184,7 +180,6 @@ export function highlightForms(formIds) {
     const priceEls = [
       ...formEl.querySelectorAll(`[${DOM_ATTRS.VARIANT_PRICE}]`),
     ];
-    highlightEls(priceEls, UI_CONTEXT.PRODUCT_PRICE);
 
     const cartFormEls = [
       ...formEl.querySelectorAll(productSelectors.product_cart_form),
@@ -200,7 +195,6 @@ export function highlightForms(formIds) {
       });
       return { target: cartFormEl, variantInputs };
     });
-    highlightEls(cartFormEls);
 
     const changeQuantityEls = [
       ...formEl.querySelectorAll(
@@ -211,7 +205,6 @@ export function highlightForms(formIds) {
         ].join(`,`)
       ),
     ];
-    highlightEls(changeQuantityEls);
 
     BSS_B2B.support.forms[location] = BSS_B2B.support.forms[location] ?? {};
 
@@ -225,7 +218,7 @@ export function highlightForms(formIds) {
       availableRules,
     };
   });
-
+  highlightForms(true);
   if (notFoundForms.length) {
     BSS_B2B.logger.error(
       'The following product forms are rendered on the page but not found in storage',
@@ -234,15 +227,12 @@ export function highlightForms(formIds) {
   }
 }
 
-export function highlightCart() {
-  if (!config.get('cart.highlightElements')) return;
-
+export function handleCart() {
   const cart = BSS_B2B.support.cart;
-
   cart.items = cart.items ?? {};
 
   for (const [key, item] of Object.entries(cart.items)) {
-    if (!item.target.isConnected || !isHighlighted(item.target))
+    if (!item.target.isConnected || !isHandled(item.target))
       delete cart.items[key];
   }
 
@@ -254,25 +244,23 @@ export function highlightCart() {
     );
     if (!cartItemEl?.isConnected) continue;
 
+    markAsHandled(cartItemEl);
+
     const { product_id: productId, variant_id: variantId } = cartItem;
 
     const availableRules = getAvailableRules({ cartKey });
     const appliedRules = getAppliedRules({ cartKey });
 
-    highlightEls([cartItemEl]);
 
     const originalPriceEls = [
       ...cartItemEl.querySelectorAll(`[${DOM_ATTRS.CART_ITEM_ORIGINAL_PRICE}]`),
     ];
-    highlightEls(originalPriceEls, UI_CONTEXT.PRODUCT_PRICE);
     const finalLinePriceEls = [
       ...cartItemEl.querySelectorAll(`[${DOM_ATTRS.CART_FINAL_LINE_PRICE}]`),
     ];
-    highlightEls(finalLinePriceEls, UI_CONTEXT.PRODUCT_PRICE);
     const changeQuantityEls = [
       ...cartItemEl.querySelectorAll(cartSelectors.button_change_quantity),
     ];
-    highlightEls(changeQuantityEls);
 
     cart.items[cartKey] = {
       target: cartItemEl,
@@ -295,56 +283,146 @@ export function highlightCart() {
     });
   }
 
-  const subTotalEls = [...BSS_B2B.utils.getSubtotalPriceElement()];
-  highlightEls(subTotalEls, UI_CONTEXT.PRODUCT_PRICE);
-  cart.subTotalEls = subTotalEls;
-
-  const openMiniCartBtns = [
+  cart.subTotalEls = [...BSS_B2B.utils.getSubtotalPriceElement()];
+  cart.openMiniCartBtns = [
     ...document.querySelectorAll(cartSelectors.btn_open_mini_cart),
   ];
-  highlightEls(openMiniCartBtns);
-  cart.openMiniCartBtns = openMiniCartBtns;
-
-  const checkoutEls = [...BSS_B2B.utils.getCheckoutElements()];
-  highlightEls(checkoutEls);
-  cart.checkoutEls = checkoutEls;
-
-  const addToCartBtns = [
+  cart.checkoutEls = [...BSS_B2B.utils.getCheckoutElements()];
+  cart.addToCartBtns = [
     ...document.querySelectorAll(cartSelectors.btn_add_to_cart),
   ];
-  highlightEls(addToCartBtns);
-  cart.addToCartBtns = addToCartBtns;
+
+  highlightCart(true);
 }
 
-export function unhighlightSearch() {
-  const search = BSS_B2B.support.search;
-  for (const searchBar of Object.values(search)) {
-    unhighlightEls([searchBar.target, ...Object.values(searchBar.cards).map(c => c.target)]);
+export function highlightSearch(force = false) {
+  if (!force && config.get('search.highlightElements')) return;
+  config.set('search.highlightElements', true);
+  for (const searchBar of Object.values(BSS_B2B.support.search)) {
+    const cards = Object.values(searchBar.cards);
+    highlightEls([searchBar.target], 'search');
+    highlightEls(cards.map(c => c.target), 'search.card');
+    highlightEls(cards.flatMap(c => c.priceEls), 'search.price');
+    highlightEls(cards.flatMap(c => c.quickViewBtns), 'search.quickViewBtn');
   }
 }
 
-export function unhighlightCollection() {
-  const collection = BSS_B2B.support.collection;
-  for (const card of Object.values(collection)) {
+export function unhighlightSearch(force = false) {
+  if (!force && !config.get('search.highlightElements')) return;
+  config.set('search.highlightElements', false);
+  for (const searchBar of Object.values(BSS_B2B.support.search)) {
+    const cards = Object.values(searchBar.cards);
+    unhighlightEls([
+      searchBar.target,
+      ...cards.map(c => c.target),
+      ...cards.flatMap(c => c.priceEls),
+      ...cards.flatMap(c => c.quickViewBtns),
+    ]);
+  }
+}
+
+export function highlightCollection(force = false) {
+  if (!force && config.get('collection.highlightElements')) return;
+  config.set('collection.highlightElements', true);
+  for (const card of Object.values(BSS_B2B.support.collection)) {
+    highlightEls([card.target], 'collection.card');
+    highlightEls(card.priceEls, 'collection.price');
+    highlightEls(card.quickViewBtns, 'collection.quickViewBtn');
+  }
+}
+
+export function unhighlightCollection(force = false) {
+  if (!force && !config.get('collection.highlightElements')) return;
+  config.set('collection.highlightElements', false);
+  for (const card of Object.values(BSS_B2B.support.collection)) {
     unhighlightEls([card.target, ...card.priceEls, ...card.quickViewBtns]);
   }
 }
 
-export function unhighlightForms() {
-  const forms = BSS_B2B.support.forms;
-  for (const locationForms of Object.values(forms)) {
+export function highlightForms(force = false) {
+  if (!force && config.get('forms.highlightElements')) return;
+  config.set('forms.highlightElements', true);
+  for (const locationForms of Object.values(BSS_B2B.support.forms)) {
     for (const form of Object.values(locationForms)) {
-      unhighlightEls([form.target, ...form.priceEls, ...form.changeQuantityEls, ...form.cartForms.map(cf => cf.target)]);
+      highlightEls([
+        form.target,
+        ...form.priceEls,
+        ...form.changeQuantityEls,
+        ...form.cartForms.map(cf => cf.target),
+      ]);
     }
   }
 }
 
-export function unhighlightCart() {
+export function unhighlightForms(force = false) {
+  if (!force && !config.get('forms.highlightElements')) return;
+  config.set('forms.highlightElements', false);
+  for (const locationForms of Object.values(BSS_B2B.support.forms)) {
+    for (const form of Object.values(locationForms)) {
+      unhighlightEls([
+        form.target,
+        ...form.priceEls,
+        ...form.changeQuantityEls,
+        ...form.cartForms.map(cf => cf.target),
+      ]);
+    }
+  }
+}
+
+export function highlightCart(force = false) {
+  if (!force && config.get('cart.highlightElements')) return;
+  config.set('cart.highlightElements', true);
+  const cart = BSS_B2B.support.cart;
+  for (const item of Object.values(cart.items)) {
+    highlightEls([item.target], 'cart.card');
+    highlightEls(item.originalPriceEls, 'cart.originalPrice');
+    highlightEls(item.finalLinePriceEls, 'cart.linePrice');
+    highlightEls(item.changeQuantityEls);
+  }
+  highlightEls([
+    ...cart.subTotalEls,
+    ...cart.openMiniCartBtns,
+    ...cart.checkoutEls,
+    ...cart.addToCartBtns,
+  ]);
+}
+
+export function unhighlightCart(force = false) {
+  if (!force && !config.get('cart.highlightElements')) return;
+  config.set('cart.highlightElements', false);
   const cart = BSS_B2B.support.cart;
   for (const [key, item] of Object.entries(cart.items)) {
-    unhighlightEls([item.target, ...item.originalPriceEls, ...item.finalLinePriceEls, ...item.changeQuantityEls]);
+    unhighlightEls([
+      item.target,
+      ...item.originalPriceEls,
+      ...item.finalLinePriceEls,
+      ...item.changeQuantityEls,
+    ]);
   }
-  unhighlightEls([...cart.subTotalEls, ...cart.openMiniCartBtns, ...cart.checkoutEls, ...cart.addToCartBtns]);
+  unhighlightEls([
+    ...cart.subTotalEls,
+    ...cart.openMiniCartBtns,
+    ...cart.checkoutEls,
+    ...cart.addToCartBtns,
+  ]);
+}
+
+const HANDLED_ATTR = 'handled';
+
+function markAsHandled(el) {
+  el.dataset[HANDLED_ATTR] = 'true';
+}
+
+function unmarkAsHandled(el) {
+  delete el.dataset[HANDLED_ATTR];
+}
+
+function isHandled(el) {
+  return el.dataset[HANDLED_ATTR] === 'true';
+}
+
+function queryUnhandled(selector, root = document) {
+  return root.querySelectorAll(`${selector}:not([data-handled="true"])`);
 }
 
 function setUIContext(el, context) {

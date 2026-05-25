@@ -3,24 +3,30 @@ import { createStorage } from '../utils/storage.js';
 const DEFAULTS = {
   search: {
     color: 'blue',
-    priceColor: 'red',
+    card: { color: 'yellow' },
+    price: { color: 'red' },
+    quickViewBtn: { color: 'green' },
     highlightElements: true,
   },
   collection: {
     color: 'green',
-    priceColor: 'red',
+    card: { color: 'orange' },
+    price: { color: 'red' },
+    quickViewBtn: { color: 'green' },
     highlightElements: true,
   },
   cart: {
-    color: 'orange',
-    priceColor: 'red',
+    card: { color: 'orange' },
+    originalPrice: { color: 'gray' },
+    linePrice: { color: 'red' },
+    subtotal: { color: 'red' },
     highlightElements: true,
   },
   form: {
-    main: { color: 'purple', priceColor: 'red' },
-    quickView: { color: 'teal', priceColor: 'red' },
-    featured: { color: 'teal', priceColor: 'red' },
-    quickOrderList: { color: 'teal', priceColor: 'red' },
+    main: { color: 'purple', price: { color: 'red' } },
+    quickView: { color: 'pink', price: { color: 'red' } },
+    featured: { color: 'blue', price: { color: 'red' } },
+    quickOrderList: { color: 'teal', price: { color: 'red' } },
     highlightElements: true,
   },
 };

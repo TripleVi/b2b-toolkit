@@ -1,3 +1,4 @@
+import { config } from '../config';
 import { getRuleUrl } from './b2b';
 import { getShopifyProductLink, getShopifyVariantLink } from './shopify';
 
@@ -99,10 +100,7 @@ const elementColors = {
 };
 
 export function highlightEls(els, uiContext) {
-  let borderColor = elementColors.default;
-  if (uiContext === UI_CONTEXT.PRODUCT_PRICE) {
-    borderColor = elementColors.price;
-  }
+  const borderColor = config.get(uiContext + '.color') ?? elementColors.default;
   els.forEach(el => {
     if (isHighlighted(el)) return;
     setHighlighted(el, true);
