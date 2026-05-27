@@ -8,6 +8,8 @@
 
 (function() {
   'use strict';
+	var __esmMin = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
+	var __commonJSMin = (cb, mod) => () => (mod || (cb((mod = { exports: {} }).exports, mod), cb = null), mod.exports);
 	function createStorage(namespace = "app", storage = localStorage) {
 		function buildKey(key) {
 			return `${namespace}:${key}`;
@@ -61,48 +63,7 @@
 			namespace
 		};
 	}
-	var DEFAULTS$1 = {
-		search: {
-			color: "blue",
-			card: { color: "yellow" },
-			price: { color: "red" },
-			quickViewBtn: { color: "green" },
-			highlightElements: true
-		},
-		collection: {
-			color: "green",
-			card: { color: "orange" },
-			price: { color: "red" },
-			quickViewBtn: { color: "green" },
-			highlightElements: true
-		},
-		cart: {
-			card: { color: "orange" },
-			originalPrice: { color: "gray" },
-			linePrice: { color: "red" },
-			subtotal: { color: "red" },
-			highlightElements: true
-		},
-		form: {
-			main: {
-				color: "purple",
-				price: { color: "red" }
-			},
-			quickView: {
-				color: "pink",
-				price: { color: "red" }
-			},
-			featured: {
-				color: "blue",
-				price: { color: "red" }
-			},
-			quickOrderList: {
-				color: "teal",
-				price: { color: "red" }
-			},
-			highlightElements: true
-		}
-	};
+	var init_storage = __esmMin((() => {}));
 	function deepMerge$1(target, source) {
 		const result = { ...target };
 		for (const key of Object.keys(source)) {
@@ -196,45 +157,59 @@
 			onChange
 		};
 	}
-	var { publicConfig, config } = (() => {
-		const instance = createAppConfig();
-		return {
-			publicConfig: instance.publicConfig,
-			config: instance
+	var DEFAULTS$1, publicConfig, config;
+	var init_config = __esmMin((() => {
+		init_storage();
+		DEFAULTS$1 = {
+			search: {
+				color: "blue",
+				card: { color: "yellow" },
+				price: { color: "red" },
+				quickViewBtn: { color: "green" },
+				highlightElements: true
+			},
+			collection: {
+				color: "green",
+				card: { color: "orange" },
+				price: { color: "red" },
+				quickViewBtn: { color: "green" },
+				highlightElements: true
+			},
+			cart: {
+				card: { color: "orange" },
+				originalPrice: { color: "gray" },
+				linePrice: { color: "red" },
+				subtotal: { color: "red" },
+				highlightElements: true
+			},
+			form: {
+				main: {
+					color: "purple",
+					price: { color: "red" }
+				},
+				quickView: {
+					color: "pink",
+					price: { color: "red" }
+				},
+				featured: {
+					color: "blue",
+					price: { color: "red" }
+				},
+				quickOrderList: {
+					color: "teal",
+					price: { color: "red" }
+				},
+				highlightElements: true
+			}
 		};
-	})();
-	var DEFAULTS = {
-		collection: {
-			selectorCard: ":not(*)",
-			selectorPrice: ":not(*)",
-			selectorQuickviewBtn: ":not(*)",
-			selectorSearchBar: ":not(*)"
-		},
-		product: {
-			selectorForm: ":not(*)",
-			selectorPrice: ":not(*)"
-		},
-		miniCart: {
-			selectorCard: ":not(*)",
-			selectorOriginPrice: ":not(*)",
-			selectorFinalLinePrice: ":not(*)",
-			selectorSubtotalPrice: ":not(*)"
-		},
-		cart: {
-			selectorCard: ":not(*)",
-			selectorOriginPrice: ":not(*)",
-			selectorFinalLinePrice: ":not(*)",
-			selectorSubtotalPrice: ":not(*)"
-		},
-		quickView: {
-			selectorCard: ":not(*)",
-			selectorPrice: ":not(*)"
-		},
-		searchBar: {
-			selectorCard: ":not(*)",
-			selectorPrice: ":not(*)"
-		}
-	};
+		({publicConfig, config} = (() => {
+			const instance = createAppConfig();
+			return {
+				publicConfig: instance.publicConfig,
+				config: instance
+			};
+		})());
+	}));
 	function deepMerge(target, source) {
 		const result = { ...target };
 		for (const key of Object.keys(source)) {
@@ -325,32 +300,74 @@
 			hasData
 		};
 	}
-	var customSelectors = createCustomSelectors();
-	var DOM_ATTRS$1 = {
-		PRODUCT_ID: "bss-b2b-product-id",
-		PRODUCT_PRICE: "bss-b2b-product-price",
-		PRODUCT_QB_ID: "bss-b2b-product-qb-id",
-		VARIANT_ID: "bss-b2b-variant-id",
-		VARIANT_PRICE: "bss-b2b-variant-price",
-		COLLECTION_ELEMENT: "bss-b2b-collection-element",
-		MAIN_PRODUCT_FORM: "bss-b2b-main-product-form",
-		PRODUCT_FORM: "bss-b2b-product-form",
-		PRODUCT_FORM_ID: "bss-b2b-product-form-id",
-		QUICKVIEW_BTN: "bss-b2b-quickview-btn",
-		SEARCHBAR_OBSERVER_ID: "bss-b2b-searchbar-observer-id",
-		CART_ITEM_KEY: "bss-b2b-cart-item-key",
-		CART_ITEM_ORIGINAL_PRICE: "bss-b2b-item-original-price",
-		CART_FINAL_LINE_PRICE: "bss-b2b-final-line-price"
-	};
-	var UI_CONTEXT = {
-		SEARCH: "search",
-		MINI_CART: "mini_cart",
-		MAIN_CART: "main_cart",
-		COLLECTION: "collection",
-		PRODUCT_PAGE: "product_page",
-		QUICK_VIEW: "quick_view",
-		PRODUCT_PRICE: "product_price"
-	};
+	var DEFAULTS, customSelectors;
+	var init_customSelectors = __esmMin((() => {
+		init_storage();
+		DEFAULTS = {
+			collection: {
+				selectorCard: ":not(*)",
+				selectorPrice: ":not(*)",
+				selectorQuickviewBtn: ":not(*)",
+				selectorSearchBar: ":not(*)"
+			},
+			product: {
+				selectorForm: ":not(*)",
+				selectorPrice: ":not(*)"
+			},
+			miniCart: {
+				selectorCard: ":not(*)",
+				selectorOriginPrice: ":not(*)",
+				selectorFinalLinePrice: ":not(*)",
+				selectorSubtotalPrice: ":not(*)"
+			},
+			cart: {
+				selectorCard: ":not(*)",
+				selectorOriginPrice: ":not(*)",
+				selectorFinalLinePrice: ":not(*)",
+				selectorSubtotalPrice: ":not(*)"
+			},
+			quickView: {
+				selectorCard: ":not(*)",
+				selectorPrice: ":not(*)"
+			},
+			searchBar: {
+				selectorCard: ":not(*)",
+				selectorPrice: ":not(*)"
+			}
+		};
+		customSelectors = createCustomSelectors();
+	}));
+	var DOM_ATTRS$1;
+	var init_domAttributes = __esmMin((() => {
+		DOM_ATTRS$1 = {
+			PRODUCT_ID: "bss-b2b-product-id",
+			PRODUCT_PRICE: "bss-b2b-product-price",
+			PRODUCT_QB_ID: "bss-b2b-product-qb-id",
+			VARIANT_ID: "bss-b2b-variant-id",
+			VARIANT_PRICE: "bss-b2b-variant-price",
+			COLLECTION_ELEMENT: "bss-b2b-collection-element",
+			MAIN_PRODUCT_FORM: "bss-b2b-main-product-form",
+			PRODUCT_FORM: "bss-b2b-product-form",
+			PRODUCT_FORM_ID: "bss-b2b-product-form-id",
+			QUICKVIEW_BTN: "bss-b2b-quickview-btn",
+			SEARCHBAR_OBSERVER_ID: "bss-b2b-searchbar-observer-id",
+			CART_ITEM_KEY: "bss-b2b-cart-item-key",
+			CART_ITEM_ORIGINAL_PRICE: "bss-b2b-item-original-price",
+			CART_FINAL_LINE_PRICE: "bss-b2b-final-line-price"
+		};
+	}));
+	var UI_CONTEXT;
+	var init_ui = __esmMin((() => {
+		UI_CONTEXT = {
+			SEARCH: "search",
+			MINI_CART: "mini_cart",
+			MAIN_CART: "main_cart",
+			COLLECTION: "collection",
+			PRODUCT_PAGE: "product_page",
+			QUICK_VIEW: "quick_view",
+			PRODUCT_PRICE: "product_price"
+		};
+	}));
 	function getRuleUrl(key, rule) {
 		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
 		const appUrl = `https://admin.shopify.com/store/${window.Shopify.shop.split(".myshopify.com")[0]}/apps/b2b-solution-custom-pricing`;
@@ -419,18 +436,21 @@
 		}
 		return rules;
 	}
+	var init_b2b = __esmMin((() => {}));
 	function getProductSelectors() {
 		return BSS_B2B.utils.SelectorsFactory.getSelectors("ProductSelectors").getSelectors();
 	}
 	function getCartSelectors() {
 		return BSS_B2B.utils.SelectorsFactory.getSelectors("CartSelectors").getSelectors();
 	}
+	var init_selectors = __esmMin((() => {}));
 	function getShopifyProductLink(id) {
 		return `https://admin.shopify.com/store/${window.Shopify.shop.split(".myshopify.com")[0]}/products/${id}`;
 	}
 	function getShopifyVariantLink(productId, variantId) {
 		return `${getShopifyProductLink(productId)}/variants/${variantId}`;
 	}
+	var init_shopify = __esmMin((() => {}));
 	function showBadges(badges) {
 		setStyles(badges, { display: "block" });
 	}
@@ -476,10 +496,6 @@
 	function toKebab(str) {
 		return str.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
 	}
-	var elementColors = {
-		price: "red",
-		default: "#00f"
-	};
 	function highlightEls(els, uiContext) {
 		const borderColor = config.get(uiContext + ".color") ?? elementColors.default;
 		els.forEach((el) => {
@@ -527,6 +543,16 @@
 	function isHighlighted(el) {
 		return el.classList.contains("highlight");
 	}
+	var elementColors;
+	var init_uiElements = __esmMin((() => {
+		init_config();
+		init_b2b();
+		init_shopify();
+		elementColors = {
+			price: "red",
+			default: "#00f"
+		};
+	}));
 	function handleSearch() {
 		document.querySelectorAll(`[${DOM_ATTRS$1.SEARCHBAR_OBSERVER_ID}]`).forEach((container) => {
 			const searchId = container.getAttribute(DOM_ATTRS$1.SEARCHBAR_OBSERVER_ID);
@@ -818,7 +844,6 @@
 			...cart.addToCartBtns
 		]);
 	}
-	var HANDLED_ATTR = "handled";
 	function markAsHandled(el) {
 		el.dataset[HANDLED_ATTR] = "true";
 	}
@@ -832,6 +857,16 @@
 		if (!el) return;
 		el.setAttribute("data-ui-context", context);
 	}
+	var HANDLED_ATTR;
+	var init_highlightElements = __esmMin((() => {
+		init_config();
+		init_domAttributes();
+		init_ui();
+		init_b2b();
+		init_selectors();
+		init_uiElements();
+		HANDLED_ATTR = "handled";
+	}));
 	function initEventTracker() {
 		const MIN_HOOK_PRIORITY = 999999999;
 		const MAX_HOOK_PRIORITY = -999999999;
@@ -889,6 +924,9 @@
 		}
 		console.error("[QuickView] No product available for form", { event });
 	}
+	var init_event_tracker = __esmMin((() => {
+		init_highlightElements();
+	}));
 	function bootstrapApp() {
 		window.bssB2BHooks = window.bssB2BHooks ?? {
 			actions: {},
@@ -949,9 +987,19 @@
 			handleForms();
 		};
 	}
-	(() => {
+	var init_bootstrap = __esmMin((() => {
+		init_config();
+		init_customSelectors();
+		init_highlightElements();
+		init_storage();
+		init_event_tracker();
+	}));
+	__commonJSMin((() => {
+		init_bootstrap();
 		if (!window.Shopify) return;
-		const app = bootstrapApp();
-		window.addEventListener("bss_b2b:module:loaded", app, { once: true });
-	})();
+		(() => {
+			const app = bootstrapApp();
+			window.addEventListener("bss_b2b:module:loaded", app, { once: true });
+		})();
+	}))();
 })();
