@@ -326,11 +326,8 @@ export function unhighlightSearch(force = false) {
 }
 
 export function highlightCollection(force = false) {
-  if (!force) {
-    if (!config.get('collection.highlightElements')) return;
-  } else {
-    config.set('collection.highlightElements', true);
-  }
+  if (!force && config.get('collection.highlightElements')) return;
+  config.set('collection.highlightElements', true);
   for (const card of Object.values(BSS_B2B.support.collection)) {
     highlightEls([card.target], 'collection.card');
     highlightEls(card.priceEls, 'collection.price');

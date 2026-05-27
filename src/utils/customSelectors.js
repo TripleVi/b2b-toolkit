@@ -1,3 +1,5 @@
+import { createStorage } from "./storage";
+
 const DEFAULTS = {
   collection: {
     selectorCard: ':not(*)',
@@ -79,66 +81,78 @@ function validateAndMerge(defaults, modified) {
 
 function createCustomSelectors() {
   const STORAGE_KEY = 'customSelectors';
-  const storage = BSS_B2B.support.shopStorage;
-  const publicConfig = deepMerge(DEFAULTS, {});
-  const addFilter = BSS_B2B.addFilter ?? BSS_B2B.custom.addFilter;
+  const storage = createStorage(Shopify.theme.schema_name);
   const tag = 'custom:config_theme/installation';
+  const addFilter = BSS_B2B.addFilter ?? BSS_B2B.custom.addFilter;
+  let publicSelectors;
 
   function init() {
     if (bssB2BHooks.filters[tag]) delete bssB2BHooks.filters[tag];
+    if (!hasData()) {
+      publicSelectors = deepMerge(DEFAULTS, {});
+      storage.set(STORAGE_KEY, publicSelectors);
+    }
     addFilter(tag, (config, { page }) => {
-      const customSelectors = get();
-      return customSelectors[page] ?? config;
+      const selectors = get();
+      return selectors[page] ?? config;
     });
+    return publicSelectors;
+  }
+
+  function _load() {
+    const saved = storage.get(STORAGE_KEY) ?? {};
+    return deepMerge(DEFAULTS, saved);
   }
 
   function get() {
-    return storage.get(STORAGE_KEY) ?? {};
+    return storage.get(STORAGE_KEY);
+  }
+
+  function hasData() {
+    return !!storage.get(STORAGE_KEY);
   }
 
   function save() {
-    const current = get();
-    const merged = validateAndMerge(current, publicConfig);
+    const current = _load();
+    const merged = validateAndMerge(current, publicSelectors);
     storage.set(STORAGE_KEY, merged);
+    publicSelectors = merged;
     return merged;
   }
 
   function enable() {
     delete bssB2BHooks.filters[tag];
-  }
-
-  function disable() {
-    delete bssB2BHooks.filters[tag];
     addFilter(tag, (config, { page }) => {
       const customSelectors = get();
       return customSelectors[page] ?? config;
     });
   }
+  
+  function disable() {
+    delete bssB2BHooks.filters[tag];
+  }
 
   function destroy() {
+    publicSelectors = undefined;
     storage.remove(STORAGE_KEY);
     delete BSS_B2B.support.customSelectors;
     delete bssB2BHooks.filters[tag];
   }
 
   return {
-    publicConfig,
+    get values() {
+      return publicSelectors;
+    },
     init,
-    get,
     save,
     enable,
     disable,
-    destroy
+    destroy,
+    hasData,
   };
 }
 
-export const { publicConfig, config } = (() => {
-  const instance = createCustomSelectors();
-  return {
-    publicConfig: instance.publicConfig,
-    customSelectors: instance,
-  };
-})();
+export const customSelectors = createCustomSelectors();
 
 export function generateCode() {
   const runnableFns = getCustomFns('runnableFns');
@@ -155,7 +169,7 @@ export function generateCode() {
   return `
       const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelectors)};
       function configTheme(config, { page }) {
-        return customSelector[page] || config;
+        return customSelectors[page] ?? config;
       }
       BSS_B2B.addFilter('custom:config_theme/installation', configTheme);
       ${fns.join()}

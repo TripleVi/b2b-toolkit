@@ -1,4 +1,5 @@
 import { config, publicConfig } from "../config";
+import { customSelectors } from "../utils/customSelectors";
 import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
 import { createStorage } from "../utils/storage";
 import { initEventTracker } from "./event-tracker";
@@ -9,24 +10,23 @@ export function bootstrapApp() {
   BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
   BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
 
-//   (() => {
-//     const registeredFns = getCustomFns('registeredFns');
-//     const runnableFns = getCustomFns('runnableFns');
+  (() => {
+    // const registeredFns = getCustomFns('registeredFns');
+    // const runnableFns = getCustomFns('runnableFns');
 
-//     registeredFns.forEach(
-//       ({ params, body }, name) => (window[name] = new Function(...params, body))
-//     );
-//     runnableFns.forEach(body => {
-//       const fn = new Function(body);
-//       fn();
-//     });
+    // registeredFns.forEach(
+    //   ({ params, body }, name) => (window[name] = new Function(...params, body))
+    // );
+    // runnableFns.forEach(body => {
+    //   const fn = new Function(body);
+    //   fn();
+    // });
 
-//     const customSelectors = shopStorage.get('customSelectors');
-//     if (customSelectors) initCustomSelectors();
+    if (customSelectors.hasData()) customSelectors.init();
 
-//     // load config
-//     // shopStorage.set('configs', { isHighlighted: true });
-//   })();
+    // load config
+    // shopStorage.set('configs', { isHighlighted: true });
+  })();
 
   const shopStorage = createStorage(Shopify.theme.schema_name);
 
@@ -43,6 +43,7 @@ export function bootstrapApp() {
         return config.save();
       },
     },
+    customSelectors,
   };
 
   Object.assign(BSS_B2B.support.utils, {
@@ -71,29 +72,28 @@ export function bootstrapApp() {
     unhighlightCart,
   });
 
+  console.log(
+    '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
+    `
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 10px 0 0 10px;
+      font-size: 14px;
+      font-weight: 700;
+    `,
+    `
+      background: #111827;
+      color: #93c5fd;
+      padding: 8px 8px;
+      border-radius: 0 10px 10px 0;
+      font-size: 13px;
+      font-weight: 600;
+    `
+  );
+
   return () => {
-      console.log(
-        '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
-        `
-          background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 8px 12px;
-          border-radius: 10px 0 0 10px;
-          font-size: 14px;
-          font-weight: 700;
-        `,
-        `
-          background: #111827;
-          color: #93c5fd;
-          padding: 8px 8px;
-          border-radius: 0 10px 10px 0;
-          font-size: 13px;
-          font-weight: 600;
-        `
-      );
-  
       initEventTracker();
-  
       handleSearch();
       handleCollection();
       handleCart();
