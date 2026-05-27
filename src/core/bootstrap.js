@@ -1,4 +1,5 @@
-import { handleCart, handleCollection, handleForms, handleSearch } from "../utils/highlightElements";
+import { config } from "../config";
+import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
 import { createStorage } from "../utils/storage";
 import { initEventTracker } from "./event-tracker";
 
@@ -28,6 +29,7 @@ export function bootstrapApp() {
 //   })();
 
   const shopStorage = createStorage(Shopify.theme.schema_name);
+
   BSS_B2B.support = {
     collection: {},
     search: {},
@@ -35,29 +37,42 @@ export function bootstrapApp() {
     cart: {},
     utils: {},
     shopStorage,
+    configs: {
+      values: config.get(),
+      set(path, value) {
+        config.set(path, value);
+      },
+      save() {
+        shopStorage.set('configs', this.values);
+      },
+    },
   };
 
-//   Object.assign(BSS_B2B.support.utils, {
-//     initCustomSelectors,
-//     processProductCards,
-//     processCart,
-//     processForm,
-//     addRunnableFn,
-//     registerFn,
-//     getCustomFnNames,
-//     getCustomFn,
-//     removeCustomFn,
-//     getShopifyProductLink,
-//     getShopifyVariantLink,
-//     getAvailableRules,
-//     getAppliedRules,
-//     generateCode,
-//     upsertStyleTag,
-//     unhighlightSearch,
-//     unhighlightCollection,
-//     unhighlightForms,
-//     unhighlightCart,
-//   });
+  Object.assign(BSS_B2B.support.utils, {
+    // initCustomSelectors,
+    // processProductCards,
+    // processCart,
+    // processForm,
+    // addRunnableFn,
+    // registerFn,
+    // getCustomFnNames,
+    // getCustomFn,
+    // removeCustomFn,
+    // getShopifyProductLink,
+    // getShopifyVariantLink,
+    // getAvailableRules,
+    // getAppliedRules,
+    // generateCode,
+    // upsertStyleTag,
+    highlightSearch,
+    highlightCollection,
+    highlightForms,
+    highlightCart,
+    unhighlightSearch,
+    unhighlightCollection,
+    unhighlightForms,
+    unhighlightCart,
+  });
 
   return () => {
       console.log(

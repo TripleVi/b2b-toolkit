@@ -91,10 +91,50 @@ function setByPath(obj, path, value) {
   return result;
 }
 
+function validateAndMerge(defaults, modified) {
+  const result = {};
+
+  for (const key of Object.keys(defaults)) {
+    const defVal = defaults[key];
+    const modVal = modified?.[key];
+
+    if (modVal === undefined) {
+      result[key] = defVal;
+      continue;
+    }
+
+    const defType = typeof defVal;
+    const modType = typeof modVal;
+
+    if (
+      defType === 'object' &&
+      modType === 'object' &&
+      !Array.isArray(defVal) &&
+      !Array.isArray(modVal) &&
+      defVal !== null &&
+      modVal !== null
+    ) {
+      result[key] = validateAndMerge(defVal, modVal);
+      continue;
+    }
+
+    if (defType !== modType) {
+      result[key] = defVal;
+      continue;
+    }
+
+    result[key] = modVal;
+  }
+
+  return result;
+}
+
 function createAppConfig() {
   const storage = createStorage(Shopify.theme.schema_name);
   const STORAGE_KEY = 'config';
   const listeners = [];
+
+  const publicConfig = deepMerge(DEFAULTS, {});
 
   function _load() {
     const saved = storage.get(STORAGE_KEY) ?? {};
@@ -116,6 +156,7 @@ function createAppConfig() {
   function reset(path) {
     if (!path) {
       storage.remove(STORAGE_KEY);
+      Object.assign(publicConfig, deepMerge(DEFAULTS, {}));
       listeners.forEach(fn => fn(null, null, { ...DEFAULTS }));
       return;
     }
@@ -123,12 +164,27 @@ function createAppConfig() {
     if (defaultValue !== undefined) set(path, defaultValue);
   }
 
+  function save() {
+    const current = _load();
+    const merged = validateAndMerge(current, publicConfig);
+    storage.set(STORAGE_KEY, merged);
+    return merged;
+  }
+
   function onChange(fn) {
     listeners.push(fn);
     return () => listeners.splice(listeners.indexOf(fn), 1);
   }
 
-  return { get, set, reset, onChange };
+  return { publicConfig, get, set, save, reset, onChange };
 }
 
 export const config = createAppConfig();
+
+// export const { publicConfig, config } = (() => {
+//   const instance = createAppConfig();
+//   return {
+//     publicConfig: instance.publicConfig,
+//     config: instance,
+//   };
+// })();

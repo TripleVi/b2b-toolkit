@@ -38,7 +38,7 @@ export function handleSearch() {
     BSS_B2B.support.search[searchId] = searchBar;
   });
 
-  highlightSearch(true);
+  highlightSearch();
 }
 
 export function handleCollection() {
@@ -56,7 +56,7 @@ export function handleCollection() {
   });
 
   BSS_B2B.support.collection = { ...collection, ...cards };
-  highlightCollection(true);
+  highlightCollection();
 }
 
 export function handleProductCards({ cardEls, uiContext }) {
@@ -218,7 +218,7 @@ export function handleForms(formIds) {
       availableRules,
     };
   });
-  highlightForms(true);
+  highlightForms();
   if (notFoundForms.length) {
     BSS_B2B.logger.error(
       'The following product forms are rendered on the page but not found in storage',
@@ -292,12 +292,14 @@ export function handleCart() {
     ...document.querySelectorAll(cartSelectors.btn_add_to_cart),
   ];
 
-  highlightCart(true);
+  highlightCart();
 }
 
 export function highlightSearch(force = false) {
-  if (!force && config.get('search.highlightElements')) return;
-  config.set('search.highlightElements', true);
+  if (!force) {
+    if (config.get('search.highlightElements')) return;
+    config.set('search.highlightElements', true);
+  }
   for (const searchBar of Object.values(BSS_B2B.support.search)) {
     const cards = Object.values(searchBar.cards);
     highlightEls([searchBar.target], 'search');
@@ -308,8 +310,10 @@ export function highlightSearch(force = false) {
 }
 
 export function unhighlightSearch(force = false) {
-  if (!force && !config.get('search.highlightElements')) return;
-  config.set('search.highlightElements', false);
+  if (!force) {
+    if (!config.get('search.highlightElements')) return;
+    config.set('search.highlightElements', false);
+  }
   for (const searchBar of Object.values(BSS_B2B.support.search)) {
     const cards = Object.values(searchBar.cards);
     unhighlightEls([
@@ -322,8 +326,11 @@ export function unhighlightSearch(force = false) {
 }
 
 export function highlightCollection(force = false) {
-  if (!force && config.get('collection.highlightElements')) return;
-  config.set('collection.highlightElements', true);
+  if (!force) {
+    if (!config.get('collection.highlightElements')) return;
+  } else {
+    config.set('collection.highlightElements', true);
+  }
   for (const card of Object.values(BSS_B2B.support.collection)) {
     highlightEls([card.target], 'collection.card');
     highlightEls(card.priceEls, 'collection.price');
@@ -332,8 +339,10 @@ export function highlightCollection(force = false) {
 }
 
 export function unhighlightCollection(force = false) {
-  if (!force && !config.get('collection.highlightElements')) return;
-  config.set('collection.highlightElements', false);
+  if (!force) {
+    if (!config.get('collection.highlightElements')) return;
+    config.set('collection.highlightElements', false);
+  }
   for (const card of Object.values(BSS_B2B.support.collection)) {
     unhighlightEls([card.target, ...card.priceEls, ...card.quickViewBtns]);
   }
