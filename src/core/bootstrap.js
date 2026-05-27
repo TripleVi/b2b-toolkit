@@ -1,4 +1,4 @@
-import { config } from "../config";
+import { config, publicConfig } from "../config";
 import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
 import { createStorage } from "../utils/storage";
 import { initEventTracker } from "./event-tracker";
@@ -38,12 +38,9 @@ export function bootstrapApp() {
     utils: {},
     shopStorage,
     configs: {
-      values: config.get(),
-      set(path, value) {
-        config.set(path, value);
-      },
+      values: publicConfig,
       save() {
-        shopStorage.set('configs', this.values);
+        return config.save();
       },
     },
   };

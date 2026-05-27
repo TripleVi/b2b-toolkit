@@ -179,12 +179,10 @@ function createAppConfig() {
   return { publicConfig, get, set, save, reset, onChange };
 }
 
-export const config = createAppConfig();
-
-// export const { publicConfig, config } = (() => {
-//   const instance = createAppConfig();
-//   return {
-//     publicConfig: instance.publicConfig,
-//     config: instance,
-//   };
-// })();
+export const { publicConfig, config } = (() => {
+  const instance = createAppConfig();
+  return {
+    publicConfig: instance.publicConfig,
+    config: instance,
+  };
+})();
