@@ -22,75 +22,81 @@ export function bootstrapApp() {
     //   fn();
     // });
 
-    if (customSelectors.hasData()) customSelectors.init();
-
+    
+    
     // load config
     // shopStorage.set('configs', { isHighlighted: true });
   })();
-
-  const shopStorage = createStorage(Shopify.theme.schema_name);
-
-  BSS_B2B.support = {
-    collection: {},
-    search: {},
-    forms: {},
-    cart: {},
-    utils: {},
-    shopStorage,
-    configs: {
-      values: publicConfig,
-      save() {
-        return config.save();
+  BSS_B2B.addFilter('custom:loadCurrency', shouldLoadCurrency => {
+    if (customSelectors.hasData()) customSelectors.init();
+    
+    const shopStorage = createStorage(Shopify.theme.schema_name);
+  
+    BSS_B2B.support = {
+      collection: {},
+      search: {},
+      forms: {},
+      cart: {},
+      utils: {},
+      shopStorage,
+      configs: {
+        values: publicConfig,
+        save() {
+          return config.save();
+        },
       },
-    },
-    customSelectors,
-  };
+      customSelectors,
+    };
+  
+    Object.assign(BSS_B2B.support.utils, {
+      // initCustomSelectors,
+      // processProductCards,
+      // processCart,
+      // processForm,
+      // addRunnableFn,
+      // registerFn,
+      // getCustomFnNames,
+      // getCustomFn,
+      // removeCustomFn,
+      // getShopifyProductLink,
+      // getShopifyVariantLink,
+      // getAvailableRules,
+      // getAppliedRules,
+      // generateCode,
+      // upsertStyleTag,
+      highlightSearch,
+      highlightCollection,
+      highlightForms,
+      highlightCart,
+      unhighlightSearch,
+      unhighlightCollection,
+      unhighlightForms,
+      unhighlightCart,
+    });
 
-  Object.assign(BSS_B2B.support.utils, {
-    // initCustomSelectors,
-    // processProductCards,
-    // processCart,
-    // processForm,
-    // addRunnableFn,
-    // registerFn,
-    // getCustomFnNames,
-    // getCustomFn,
-    // removeCustomFn,
-    // getShopifyProductLink,
-    // getShopifyVariantLink,
-    // getAvailableRules,
-    // getAppliedRules,
-    // generateCode,
-    // upsertStyleTag,
-    highlightSearch,
-    highlightCollection,
-    highlightForms,
-    highlightCart,
-    unhighlightSearch,
-    unhighlightCollection,
-    unhighlightForms,
-    unhighlightCart,
+    console.log(
+      '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
+      `
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 10px 0 0 10px;
+        font-size: 14px;
+        font-weight: 700;
+      `,
+      `
+        background: #111827;
+        color: #93c5fd;
+        padding: 8px 8px;
+        border-radius: 0 10px 10px 0;
+        font-size: 13px;
+        font-weight: 600;
+      `
+    );
+    return shouldLoadCurrency;
   });
 
-  console.log(
-    '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
-    `
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 10px 0 0 10px;
-      font-size: 14px;
-      font-weight: 700;
-    `,
-    `
-      background: #111827;
-      color: #93c5fd;
-      padding: 8px 8px;
-      border-radius: 0 10px 10px 0;
-      font-size: 13px;
-      font-weight: 600;
-    `
-  );
+
 
   return () => {
       initEventTracker();

@@ -1,5 +1,3 @@
-if (!window.Shopify) return;
-
 import { bootstrapApp } from './core/bootstrap';
 
 (() => {
