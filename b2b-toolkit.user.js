@@ -1,9 +1,20 @@
 // ==UserScript==
-// @name       b2b-toolkit
-// @namespace  npm/vite-plugin-monkey
-// @version    0.0.0
-// @icon       https://vitejs.dev/logo.svg
-// @match      https://*/*
+// @name         B2B Toolkit
+// @namespace    npm/vite-plugin-monkey
+// @version      0.1.0
+// @author       TripleVi
+// @description  Internal support toolkit for B2B Solution
+// @icon         https://vitejs.dev/logo.svg
+// @supportURL   https://github.com/TripleVi/b2b-toolkit
+// @downloadURL  https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
+// @updateURL    https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
+// @match        https://*/*
+// @grant        GM_addStyle
+// @grant        GM_deleteValue
+// @grant        GM_getValue
+// @grant        GM_listValues
+// @grant        GM_setValue
+// @run-at       document-start
 // ==/UserScript==
 
 (function() {
@@ -927,7 +938,6 @@
 			actions: {},
 			filters: {}
 		};
-		console.log("Bootstrapping BSS B2B Toolkit...", structuredClone(window.bssB2BHooks));
 		window.BSS_B2B = window.BSS_B2B ?? {};
 		BSS_B2B.addAction = (tag, callback) => bssB2BHooks.actions[tag] = callback;
 		BSS_B2B.addFilter = (tag, callback) => bssB2BHooks.filters[tag] = callback;
