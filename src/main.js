@@ -1,6 +1,7 @@
-async function onB2bReady() {
+import bootstrapApp from './core/bootstrap';
+
+function onB2bReady() {
   if (!window.Shopify) return;
-  const { bootstrapApp } = await import('./core/bootstrap');
   const app = bootstrapApp();
   window.addEventListener('bss_b2b:module:loaded', app, { once: true });
 }

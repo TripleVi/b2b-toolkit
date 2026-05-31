@@ -152,7 +152,24 @@ function createCustomSelectors() {
   };
 }
 
-export const customSelectors = createCustomSelectors();
+let _instance = null;
+
+function getInstance() {
+  if (!_instance) _instance = createCustomSelectors();
+  return _instance;
+}
+
+export const customSelectors = {
+  get values() {
+    return getInstance().values;
+  },
+  init: () => getInstance().init(),
+  save: () => getInstance().save(),
+  enable: () => getInstance().enable(),
+  disable: () => getInstance().disable(),
+  destroy: () => getInstance().destroy(),
+  hasData: () => getInstance().hasData(),
+};
 
 export function generateCode() {
   const runnableFns = getCustomFns('runnableFns');

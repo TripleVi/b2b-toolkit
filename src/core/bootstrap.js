@@ -1,10 +1,10 @@
-import { config, publicConfig } from "../config";
+import { config } from "../config";
 import { customSelectors } from "../utils/customSelectors";
 import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
 import { createStorage } from "../utils/storage";
 import { initEventTracker } from "./event-tracker";
 
-export function bootstrapApp() {
+export default function bootstrapApp() {
   window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
   console.log('Bootstrapping BSS B2B Toolkit...', structuredClone(window.bssB2BHooks));
   window.BSS_B2B = window.BSS_B2B ?? {};
@@ -40,7 +40,7 @@ BSS_B2B.support = {
   utils: {},
   shopStorage,
   configs: {
-    values: publicConfig,
+    values: config.publicConfig,
     save() {
       return config.save();
     },

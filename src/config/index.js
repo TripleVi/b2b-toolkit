@@ -179,10 +179,30 @@ function createAppConfig() {
   return { publicConfig, get, set, save, reset, onChange };
 }
 
-export const { publicConfig, config } = (() => {
-  const instance = createAppConfig();
-  return {
-    publicConfig: instance.publicConfig,
-    config: instance,
-  };
-})();
+let _instance = null;
+
+function getInstance() {
+  if (!_instance) _instance = createAppConfig();
+  return _instance;
+}
+
+export const config = {
+  get publicConfig() {
+    return getInstance().publicConfig;
+  },
+  get(path) {
+    return getInstance().get(path);
+  },
+  set(path, value) {
+    return getInstance().set(path, value);
+  },
+  save() {
+    return getInstance().save();
+  },
+  reset(path) {
+    return getInstance().reset(path);
+  },
+  onChange(fn) {
+    return getInstance().onChange(fn);
+  },
+};
