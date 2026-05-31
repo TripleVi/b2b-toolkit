@@ -6,7 +6,6 @@ import { initEventTracker } from "./event-tracker";
 
 export default function bootstrapApp() {
   window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
-  console.log('Bootstrapping BSS B2B Toolkit...', structuredClone(window.bssB2BHooks));
   window.BSS_B2B = window.BSS_B2B ?? {};
   BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
   BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
@@ -22,8 +21,6 @@ export default function bootstrapApp() {
     //   const fn = new Function(body);
     //   fn();
     // });
-
-    
     
     // load config
     // shopStorage.set('configs', { isHighlighted: true });
