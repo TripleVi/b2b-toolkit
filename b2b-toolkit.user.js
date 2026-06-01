@@ -232,6 +232,74 @@
 			return getInstance$1().onChange(fn);
 		}
 	};
+	function getRuleUrl(key, rule) {
+		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
+		const appUrl = `https://admin.shopify.com/store/${window.Shopify.shop.split(".myshopify.com")[0]}/apps/b2b-solution-custom-pricing`;
+		switch (key) {
+			case PL_KEY: return `${appUrl}/b2b-pricing/price-list/${rule.id}`;
+			case CP_KEY: return `${appUrl}/b2b-pricing/cp/${rule.id}`;
+			case QB_KEY: return `${appUrl}/b2b-pricing/qb/${rule.id}`;
+			case TD_KEY: return `${appUrl}/tax-currency-management/tax-display/${rule.id}`;
+			default: return null;
+		}
+	}
+	function getAppliedRules({ productId, formId, cartKey }) {
+		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
+		const rules = {};
+		const { storage: { productStorage, productFormStorage, variantStorage, cartStorage } } = BSS_B2B;
+		if (productId) {
+			const product = productStorage.get(productId);
+			const variant = variantStorage.get(product?.currentVariant?.id);
+			if (!variant) return rules;
+			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
+			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
+			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
+			return rules;
+		} else if (formId) {
+			const product = productFormStorage.get(formId);
+			const variant = variantStorage.get(product?.currentVariant?.id);
+			if (!variant) return rules;
+			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
+			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
+			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
+			return rules;
+		} else if (cartKey) {
+			const cartItem = cartStorage.get(cartKey);
+			const variant = variantStorage.get(cartItem.variant_id);
+			if (!variant) return rules;
+			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
+			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
+			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
+			return rules;
+		} else return rules;
+	}
+	function getAvailableRules({ productId, formId, cartKey }) {
+		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
+		const { cp, pl, td, storage: { productStorage, productFormStorage, variantStorage, cartStorage } } = BSS_B2B;
+		const rules = {};
+		let product;
+		if (productId) product = productStorage.get(productId);
+		else if (formId) product = productFormStorage.get(formId);
+		else if (cartKey) {
+			const cartItem = cartStorage.get(cartKey);
+			product = productStorage.get(cartItem?.product_id);
+			if (product) product.currentVariant = variantStorage.get(cartItem?.variant_id);
+		} else return rules;
+		if (!variantStorage.has(product?.currentVariant?.id)) return rules;
+		if (cp.cpRules?.length) {
+			const arr = cp.utils.common.getCustomerAppliedRules().filter((rule) => cp.utils.common.checkProduct(rule, product));
+			if (arr.length) rules[CP_KEY] = arr;
+		}
+		if (pl.plRules?.length) {
+			const arr = pl.utils.common.getCustomerAppliedRules().filter((rule) => pl.utils.common.checkProduct(rule, product));
+			if (arr.length) rules[PL_KEY] = arr;
+		}
+		if (td.tdRules?.length) {
+			const arr = td.utils.common.getCustomerAppliedRules().filter((rule) => td.utils.common.checkProduct(rule, product));
+			if (arr.length) rules[TD_KEY] = arr;
+		}
+		return rules;
+	}
 	var DEFAULTS = {
 		collection: {
 			selectorCard: ":not(*)",
@@ -306,7 +374,7 @@
 			if (!hasData()) {
 				publicSelectors = deepMerge(DEFAULTS, {});
 				storage.set(STORAGE_KEY, publicSelectors);
-			}
+			} else publicSelectors = get();
 			addFilter(tag, (config, { page }) => {
 				return get()[page] ?? config;
 			});
@@ -370,6 +438,27 @@
 		destroy: () => getInstance().destroy(),
 		hasData: () => getInstance().hasData()
 	};
+	function generateCode() {
+		const runnableFns = getCustomFns("runnableFns");
+		const fns = [];
+		runnableFns.forEach((body, name) => {
+			const fn = new Function(body);
+			const str = fn.toString().replace("function anonymous", `function ${name}`);
+			fns.push(`
+        ${str}
+        ${name}();
+      `);
+			fn();
+		});
+		return `
+      const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelectors)};
+      function configTheme(config, { page }) {
+        return customSelectors[page] ?? config;
+      }
+      BSS_B2B.addFilter('custom:config_theme/installation', configTheme);
+      ${fns.join()}
+    `;
+	}
 	var DOM_ATTRS$1 = {
 		PRODUCT_ID: "bss-b2b-product-id",
 		PRODUCT_PRICE: "bss-b2b-product-price",
@@ -395,74 +484,6 @@
 		QUICK_VIEW: "quick_view",
 		PRODUCT_PRICE: "product_price"
 	};
-	function getRuleUrl(key, rule) {
-		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
-		const appUrl = `https://admin.shopify.com/store/${window.Shopify.shop.split(".myshopify.com")[0]}/apps/b2b-solution-custom-pricing`;
-		switch (key) {
-			case PL_KEY: return `${appUrl}/b2b-pricing/price-list/${rule.id}`;
-			case CP_KEY: return `${appUrl}/b2b-pricing/cp/${rule.id}`;
-			case QB_KEY: return `${appUrl}/b2b-pricing/qb/${rule.id}`;
-			case TD_KEY: return `${appUrl}/tax-currency-management/tax-display/${rule.id}`;
-			default: return null;
-		}
-	}
-	function getAppliedRules({ productId, formId, cartKey }) {
-		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
-		const rules = {};
-		const { storage: { productStorage, productFormStorage, variantStorage, cartStorage } } = BSS_B2B;
-		if (productId) {
-			const product = productStorage.get(productId);
-			const variant = variantStorage.get(product?.currentVariant?.id);
-			if (!variant) return rules;
-			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
-			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
-			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
-			return rules;
-		} else if (formId) {
-			const product = productFormStorage.get(formId);
-			const variant = variantStorage.get(product?.currentVariant?.id);
-			if (!variant) return rules;
-			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
-			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
-			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
-			return rules;
-		} else if (cartKey) {
-			const cartItem = cartStorage.get(cartKey);
-			const variant = variantStorage.get(cartItem.variant_id);
-			if (!variant) return rules;
-			if (variant.appliedPL) rules[PL_KEY] = variant.appliedPL;
-			else if (variant.appliedCP) rules[CP_KEY] = variant.appliedCP;
-			if (variant.appliedTD) rules[TD_KEY] = variant.appliedTD;
-			return rules;
-		} else return rules;
-	}
-	function getAvailableRules({ productId, formId, cartKey }) {
-		const { TD_KEY, PL_KEY, CP_KEY, QB_KEY } = BSS_B2B.enum;
-		const { cp, pl, td, storage: { productStorage, productFormStorage, variantStorage, cartStorage } } = BSS_B2B;
-		const rules = {};
-		let product;
-		if (productId) product = productStorage.get(productId);
-		else if (formId) product = productFormStorage.get(formId);
-		else if (cartKey) {
-			const cartItem = cartStorage.get(cartKey);
-			product = productStorage.get(cartItem?.product_id);
-			if (product) product.currentVariant = variantStorage.get(cartItem?.variant_id);
-		} else return rules;
-		if (!variantStorage.has(product?.currentVariant?.id)) return rules;
-		if (cp.cpRules?.length) {
-			const arr = cp.utils.common.getCustomerAppliedRules().filter((rule) => cp.utils.common.checkProduct(rule, product));
-			if (arr.length) rules[CP_KEY] = arr;
-		}
-		if (pl.plRules?.length) {
-			const arr = pl.utils.common.getCustomerAppliedRules().filter((rule) => pl.utils.common.checkProduct(rule, product));
-			if (arr.length) rules[PL_KEY] = arr;
-		}
-		if (td.tdRules?.length) {
-			const arr = td.utils.common.getCustomerAppliedRules().filter((rule) => td.utils.common.checkProduct(rule, product));
-			if (arr.length) rules[TD_KEY] = arr;
-		}
-		return rules;
-	}
 	function getProductSelectors() {
 		return BSS_B2B.utils.SelectorsFactory.getSelectors("ProductSelectors").getSelectors();
 	}
@@ -474,6 +495,15 @@
 	}
 	function getShopifyVariantLink(productId, variantId) {
 		return `${getShopifyProductLink(productId)}/variants/${variantId}`;
+	}
+	function upsertStyleTag(content, styleId = "bss-b2b-style") {
+		let styleEl = document.getElementById(styleId);
+		if (!(styleEl instanceof HTMLStyleElement)) {
+			styleEl = document.createElement("style");
+			styleEl.id = styleId;
+			document.head.appendChild(styleEl);
+		}
+		styleEl.textContent = content;
 	}
 	function showBadges(badges) {
 		setStyles(badges, { display: "block" });
@@ -789,7 +819,6 @@
 		}
 	}
 	function highlightCollection(force = false) {
-		if (!force && config.get("collection.highlightElements")) return;
 		config.set("collection.highlightElements", true);
 		for (const card of Object.values(BSS_B2B.support.collection)) {
 			highlightEls([card.target], "collection.card");
@@ -798,10 +827,7 @@
 		}
 	}
 	function unhighlightCollection(force = false) {
-		if (!force) {
-			if (!config.get("collection.highlightElements")) return;
-			config.set("collection.highlightElements", false);
-		}
+		config.set("collection.highlightElements", false);
 		for (const card of Object.values(BSS_B2B.support.collection)) unhighlightEls([
 			card.target,
 			...card.priceEls,
@@ -809,7 +835,6 @@
 		]);
 	}
 	function highlightForms(force = false) {
-		if (!force && config.get("forms.highlightElements")) return;
 		config.set("forms.highlightElements", true);
 		for (const locationForms of Object.values(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) highlightEls([
 			form.target,
@@ -819,7 +844,6 @@
 		]);
 	}
 	function unhighlightForms(force = false) {
-		if (!force && !config.get("forms.highlightElements")) return;
 		config.set("forms.highlightElements", false);
 		for (const locationForms of Object.values(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) unhighlightEls([
 			form.target,
@@ -829,7 +853,6 @@
 		]);
 	}
 	function highlightCart(force = false) {
-		if (!force && config.get("cart.highlightElements")) return;
 		config.set("cart.highlightElements", true);
 		const cart = BSS_B2B.support.cart;
 		for (const item of Object.values(cart.items)) {
@@ -846,7 +869,6 @@
 		]);
 	}
 	function unhighlightCart(force = false) {
-		if (!force && !config.get("cart.highlightElements")) return;
 		config.set("cart.highlightElements", false);
 		const cart = BSS_B2B.support.cart;
 		for (const [key, item] of Object.entries(cart.items)) unhighlightEls([
@@ -933,6 +955,105 @@
 		}
 		console.error("[QuickView] No product available for form", { event });
 	}
+	function processProductCards() {
+		window.dispatchEvent(new Event("scroll"));
+	}
+	function processForms() {
+		BSS_B2B.observer.productSubject.notifyObserver("ProductMutate", "ProductPriceMutate", {
+			scope: "product_form",
+			reload: true
+		});
+	}
+	function processCart() {
+		document.dispatchEvent(new Event("bss_b2b:CustomCartUpdate"));
+	}
+	function validateCustomFn(fn) {
+		if (typeof fn !== "function") throw new TypeError("Expected a function as argument");
+		if (fn.name === "") throw new Error("Function must have a name");
+		if (fn.name in window) {
+			if (typeof window[fn.name] === "function") throw new Error(`Function "${fn.name}" already exists on global scope`);
+			throw new Error(`Global name "${fn.name}" is already in use`);
+		}
+		const str = fn.toString();
+		if (!str.endsWith("}")) throw new Error("Function must use a block body `{}` (no implicit return)");
+		return str.slice(str.indexOf("{") + 1, str.lastIndexOf("}"));
+	}
+	function getParams(fn) {
+		const argsStr = fn.toString().match(/\(([\s\S]*?)\)/)?.[1] || "";
+		const params = [];
+		let current = "";
+		let depth = 0;
+		let inString = false;
+		let stringChar = "";
+		for (let i = 0; i < argsStr.length; i++) {
+			const char = argsStr[i];
+			if (inString) {
+				current += char;
+				if (char === stringChar && argsStr[i - 1] !== "\\") inString = false;
+				continue;
+			}
+			if (char === "\"" || char === "'" || char === "`") {
+				inString = true;
+				stringChar = char;
+				current += char;
+				continue;
+			}
+			if (char === "(" || char === "{" || char === "[") depth++;
+			if (char === ")" || char === "}" || char === "]") depth--;
+			if (char === "," && depth === 0) {
+				params.push(current.trim());
+				current = "";
+				continue;
+			}
+			current += char;
+		}
+		if (current.trim()) params.push(current.trim());
+		return params;
+	}
+	function addRunnableFn(fn) {
+		const key = "runnableFns";
+		const body = validateCustomFn(fn);
+		const customFns = getCustomFns$1(key);
+		customFns.set(fn.name, body);
+		saveCustomFns(key, customFns);
+	}
+	function registerFn(fn) {
+		const key = "registeredFns";
+		const body = validateCustomFn(fn);
+		const params = getParams(fn);
+		const customFns = getCustomFns$1(key);
+		customFns.set(fn.name, {
+			params,
+			body
+		});
+		saveCustomFns(key, customFns);
+	}
+	function getCustomFns$1(key) {
+		const storage = createStorage(Shopify.theme.schema_name);
+		return new Map(storage.get(key) ?? []);
+	}
+	function saveCustomFns(key, customFns) {
+		createStorage(Shopify.theme.schema_name).set(key, [...customFns]);
+	}
+	function getCustomFn(name) {
+		const customFns = getCustomFns$1();
+		return customFns.get(name) && new Function(customFns.get(name));
+	}
+	function removeCustomFn(name) {
+		const customFns = getCustomFns$1();
+		const storage = createStorage(Shopify.theme.schema_name);
+		if (customFns.delete(name)) {
+			storage.set("customFns", [...customFns]);
+			return true;
+		}
+		return false;
+	}
+	var customFunctions_default = {
+		addRunnableFn,
+		registerFn,
+		getCustomFn,
+		removeCustomFn
+	};
 	function bootstrapApp() {
 		window.bssB2BHooks = window.bssB2BHooks ?? {
 			actions: {},
@@ -941,6 +1062,12 @@
 		window.BSS_B2B = window.BSS_B2B ?? {};
 		BSS_B2B.addAction = (tag, callback) => bssB2BHooks.actions[tag] = callback;
 		BSS_B2B.addFilter = (tag, callback) => bssB2BHooks.filters[tag] = callback;
+		const registeredFns = getCustomFns("registeredFns");
+		const runnableFns = getCustomFns("runnableFns");
+		registeredFns.forEach(({ params, body }, name) => window[name] = new Function(...params, body));
+		runnableFns.forEach((body) => {
+			new Function(body)();
+		});
 		if (customSelectors.hasData()) customSelectors.init();
 		const shopStorage = createStorage(Shopify.theme.schema_name);
 		BSS_B2B.support = {
@@ -956,9 +1083,19 @@
 					return config.save();
 				}
 			},
-			customSelectors
+			customSelectors,
+			customFns: customFunctions_default
 		};
 		Object.assign(BSS_B2B.support.utils, {
+			processProductCards,
+			processCart,
+			processForms,
+			getShopifyProductLink,
+			getShopifyVariantLink,
+			getAvailableRules,
+			getAppliedRules,
+			generateCode,
+			upsertStyleTag,
 			highlightSearch,
 			highlightCollection,
 			highlightForms,
