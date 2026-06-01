@@ -1,4 +1,6 @@
-export function validateCustomFn(fn) {
+import { createStorage } from './storage';
+
+function validateCustomFn(fn) {
   if (typeof fn !== 'function')
     throw new TypeError('Expected a function as argument');
   if (fn.name === '') throw new Error('Function must have a name');
@@ -16,7 +18,7 @@ export function validateCustomFn(fn) {
   return str.slice(str.indexOf('{') + 1, str.lastIndexOf('}'));
 }
 
-export function getParams(fn) {
+function getParams(fn) {
   const str = fn.toString();
   const argsStr = str.match(/\(([\s\S]*?)\)/)?.[1] || '';
 
@@ -60,7 +62,7 @@ export function getParams(fn) {
   return params;
 }
 
-export function addRunnableFn(fn) {
+function addRunnableFn(fn) {
   const key = 'runnableFns';
   const body = validateCustomFn(fn);
   const customFns = getCustomFns(key);
@@ -68,7 +70,7 @@ export function addRunnableFn(fn) {
   saveCustomFns(key, customFns);
 }
 
-export function registerFn(fn) {
+function registerFn(fn) {
   const key = 'registeredFns';
   const body = validateCustomFn(fn);
   const params = getParams(fn);
@@ -77,36 +79,47 @@ export function registerFn(fn) {
   saveCustomFns(key, customFns);
 }
 
-export function getCustomFns(key) {
-  return new Map(BSS_B2B.support.shopStorage.get(key) ?? []);
+function getCustomFns(key) {
+  const storage = createStorage(Shopify.theme.schema_name);
+  return new Map(storage.get(key) ?? []);
 }
 
-export function getRunnableFns(key) {
+function getRunnableFns(key) {
   const runnableFns = getCustomFns('runnableFns');
 }
 
-export function getRegisteredFns(key) {
+function getRegisteredFns(key) {
   const registeredFns = getCustomFns('registeredFns');
 }
 
-export function saveCustomFns(key, customFns) {
-  BSS_B2B.support.shopStorage.set(key, [...customFns]);
+function saveCustomFns(key, customFns) {
+  const storage = createStorage(Shopify.theme.schema_name);
+  storage.set(key, [...customFns]);
 }
 
-export function getCustomFnNames() {
-  return new Map(BSS_B2B.support.shopStorage.get('customFns') ?? []).keys().toArray();
+function getCustomFnNames() {
+  const storage = createStorage(Shopify.theme.schema_name);
+  return new Map(storage.get('customFns') ?? []).keys().toArray();
 }
 
-export function getCustomFn(name) {
+function getCustomFn(name) { 
   const customFns = getCustomFns();
   return customFns.get(name) && new Function(customFns.get(name));
 }
 
-export function removeCustomFn(name) {
+function removeCustomFn(name) {
   const customFns = getCustomFns();
+  const storage = createStorage(Shopify.theme.schema_name);
   if (customFns.delete(name)) {
-    BSS_B2B.support.shopStorage.set('customFns', [...customFns]);
+    storage.set('customFns', [...customFns]);
     return true;
   }
   return false;
 }
+
+export default {
+  addRunnableFn,
+  registerFn,
+  getCustomFn,
+  removeCustomFn
+};

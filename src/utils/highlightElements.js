@@ -326,7 +326,7 @@ export function unhighlightSearch(force = false) {
 }
 
 export function highlightCollection(force = false) {
-  if (!force && config.get('collection.highlightElements')) return;
+  // if (!force && config.get('collection.highlightElements')) return;
   config.set('collection.highlightElements', true);
   for (const card of Object.values(BSS_B2B.support.collection)) {
     highlightEls([card.target], 'collection.card');
@@ -336,17 +336,17 @@ export function highlightCollection(force = false) {
 }
 
 export function unhighlightCollection(force = false) {
-  if (!force) {
-    if (!config.get('collection.highlightElements')) return;
-    config.set('collection.highlightElements', false);
-  }
+  // if (!force) {
+  //   if (!config.get('collection.highlightElements')) return;
+  // }
+  config.set('collection.highlightElements', false);
   for (const card of Object.values(BSS_B2B.support.collection)) {
     unhighlightEls([card.target, ...card.priceEls, ...card.quickViewBtns]);
   }
 }
 
 export function highlightForms(force = false) {
-  if (!force && config.get('forms.highlightElements')) return;
+  // if (!force && config.get('forms.highlightElements')) return;
   config.set('forms.highlightElements', true);
   for (const locationForms of Object.values(BSS_B2B.support.forms)) {
     for (const form of Object.values(locationForms)) {
@@ -361,7 +361,7 @@ export function highlightForms(force = false) {
 }
 
 export function unhighlightForms(force = false) {
-  if (!force && !config.get('forms.highlightElements')) return;
+  // if (!force && !config.get('forms.highlightElements')) return;
   config.set('forms.highlightElements', false);
   for (const locationForms of Object.values(BSS_B2B.support.forms)) {
     for (const form of Object.values(locationForms)) {
@@ -376,7 +376,7 @@ export function unhighlightForms(force = false) {
 }
 
 export function highlightCart(force = false) {
-  if (!force && config.get('cart.highlightElements')) return;
+  // if (!force && config.get('cart.highlightElements')) return;
   config.set('cart.highlightElements', true);
   const cart = BSS_B2B.support.cart;
   for (const item of Object.values(cart.items)) {
@@ -394,7 +394,7 @@ export function highlightCart(force = false) {
 }
 
 export function unhighlightCart(force = false) {
-  if (!force && !config.get('cart.highlightElements')) return;
+  // if (!force && !config.get('cart.highlightElements')) return;
   config.set('cart.highlightElements', false);
   const cart = BSS_B2B.support.cart;
   for (const [key, item] of Object.entries(cart.items)) {

@@ -1,8 +1,13 @@
 import { config } from "../config";
-import { customSelectors } from "../utils/customSelectors";
+import { getAppliedRules, getAvailableRules } from "../utils/b2b";
+import { customSelectors, generateCode } from "../utils/customSelectors";
 import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
+import { getShopifyProductLink, getShopifyVariantLink } from "../utils/shopify";
 import { createStorage } from "../utils/storage";
+import { upsertStyleTag } from "../utils/uiElements";
 import { initEventTracker } from "./event-tracker";
+import { processCart, processForms, processProductCards } from "./pricing";
+import customFns from "../utils/customFunctions";
 
 export default function bootstrapApp() {
   window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
@@ -10,21 +15,17 @@ export default function bootstrapApp() {
   BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
   BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
 
-  (() => {
-    // const registeredFns = getCustomFns('registeredFns');
-    // const runnableFns = getCustomFns('runnableFns');
+    const registeredFns = getCustomFns('registeredFns');
+    const runnableFns = getCustomFns('runnableFns');
 
-    // registeredFns.forEach(
-    //   ({ params, body }, name) => (window[name] = new Function(...params, body))
-    // );
-    // runnableFns.forEach(body => {
-    //   const fn = new Function(body);
-    //   fn();
-    // });
-    
-    // load config
-    // shopStorage.set('configs', { isHighlighted: true });
-  })();
+    registeredFns.forEach(
+      ({ params, body }, name) => (window[name] = new Function(...params, body))
+    );
+    runnableFns.forEach(body => {
+      const fn = new Function(body);
+      fn();
+    });
+
 if (customSelectors.hasData()) customSelectors.init();
 
 const shopStorage = createStorage(Shopify.theme.schema_name);
@@ -43,24 +44,24 @@ BSS_B2B.support = {
     },
   },
   customSelectors,
+  customFns,
 };
 
 Object.assign(BSS_B2B.support.utils, {
-  // initCustomSelectors,
-  // processProductCards,
-  // processCart,
-  // processForm,
+  processProductCards,
+  processCart,
+  processForms,
   // addRunnableFn,
   // registerFn,
   // getCustomFnNames,
   // getCustomFn,
   // removeCustomFn,
-  // getShopifyProductLink,
-  // getShopifyVariantLink,
-  // getAvailableRules,
-  // getAppliedRules,
-  // generateCode,
-  // upsertStyleTag,
+  getShopifyProductLink,
+  getShopifyVariantLink,
+  getAvailableRules,
+  getAppliedRules,
+  generateCode,
+  upsertStyleTag,
   highlightSearch,
   highlightCollection,
   highlightForms,

@@ -1,4 +1,4 @@
-import { createStorage } from "./storage";
+import { createStorage } from './storage';
 
 const DEFAULTS = {
   collection: {
@@ -91,6 +91,8 @@ function createCustomSelectors() {
     if (!hasData()) {
       publicSelectors = deepMerge(DEFAULTS, {});
       storage.set(STORAGE_KEY, publicSelectors);
+    } else {
+      publicSelectors = get();
     }
     addFilter(tag, (config, { page }) => {
       const selectors = get();
@@ -127,7 +129,7 @@ function createCustomSelectors() {
       return customSelectors[page] ?? config;
     });
   }
-  
+
   function disable() {
     delete bssB2BHooks.filters[tag];
   }
