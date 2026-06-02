@@ -1,13 +1,26 @@
-import { config } from "../config";
-import { getAppliedRules, getAvailableRules } from "../utils/b2b";
-import { customSelectors, generateCode } from "../utils/customSelectors";
-import { handleCart, handleCollection, handleForms, handleSearch, highlightCart, highlightCollection, highlightForms, highlightSearch, unhighlightCart, unhighlightCollection, unhighlightForms, unhighlightSearch } from "../utils/highlightElements";
-import { getShopifyProductLink, getShopifyVariantLink } from "../utils/shopify";
-import { createStorage } from "../utils/storage";
-import { upsertStyleTag } from "../utils/uiElements";
-import { initEventTracker } from "./event-tracker";
-import { processCart, processForms, processProductCards } from "./pricing";
-import customFns from "../utils/customFunctions";
+import { config } from '../config';
+import { getAppliedRules, getAvailableRules } from '../utils/b2b';
+import customFns from '../utils/customFunctions';
+import { customSelectors, generateCode } from '../utils/customSelectors';
+import {
+  handleCart,
+  handleCollection,
+  handleForms,
+  handleSearch,
+  highlightCart,
+  highlightCollection,
+  highlightForms,
+  highlightSearch,
+  unhighlightCart,
+  unhighlightCollection,
+  unhighlightForms,
+  unhighlightSearch,
+} from '../utils/highlightElements';
+import { getShopifyProductLink, getShopifyVariantLink } from '../utils/shopify';
+import { createStorage } from '../utils/storage';
+import { upsertStyleTag } from '../utils/uiElements';
+import { initEventTracker } from './event-tracker';
+import { processCart, processForms, processProductCards } from './pricing';
 
 export default function bootstrapApp() {
   window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
@@ -15,66 +28,52 @@ export default function bootstrapApp() {
   BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
   BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
 
-    const registeredFns = getCustomFns('registeredFns');
-    const runnableFns = getCustomFns('runnableFns');
+  customFns.execute();
 
-    registeredFns.forEach(
-      ({ params, body }, name) => (window[name] = new Function(...params, body))
-    );
-    runnableFns.forEach(body => {
-      const fn = new Function(body);
-      fn();
-    });
+  if (customSelectors.hasData()) customSelectors.init();
 
-if (customSelectors.hasData()) customSelectors.init();
+  const shopStorage = createStorage(Shopify.theme.schema_name);
 
-const shopStorage = createStorage(Shopify.theme.schema_name);
-
-BSS_B2B.support = {
-  collection: {},
-  search: {},
-  forms: {},
-  cart: {},
-  utils: {},
-  shopStorage,
-  configs: {
-    values: config.publicConfig,
-    save() {
-      return config.save();
+  BSS_B2B.support = {
+    collection: {},
+    search: {},
+    forms: {},
+    cart: {},
+    utils: {},
+    shopStorage,
+    configs: {
+      values: config.publicConfig,
+      save() {
+        return config.save();
+      },
     },
-  },
-  customSelectors,
-  customFns,
-};
+    customSelectors,
+    customFns,
+  };
 
-Object.assign(BSS_B2B.support.utils, {
-  processProductCards,
-  processCart,
-  processForms,
-  // addRunnableFn,
-  // registerFn,
-  // getCustomFnNames,
-  // getCustomFn,
-  // removeCustomFn,
-  getShopifyProductLink,
-  getShopifyVariantLink,
-  getAvailableRules,
-  getAppliedRules,
-  generateCode,
-  upsertStyleTag,
-  highlightSearch,
-  highlightCollection,
-  highlightForms,
-  highlightCart,
-  unhighlightSearch,
-  unhighlightCollection,
-  unhighlightForms,
-  unhighlightCart,
-});
+  Object.assign(BSS_B2B.support.utils, {
+    processProductCards,
+    processCart,
+    processForms,
+    getShopifyProductLink,
+    getShopifyVariantLink,
+    getAvailableRules,
+    getAppliedRules,
+    generateCode,
+    upsertStyleTag,
+    highlightSearch,
+    highlightCollection,
+    highlightForms,
+    highlightCart,
+    unhighlightSearch,
+    unhighlightCollection,
+    unhighlightForms,
+    unhighlightCart,
+  });
 
-console.log(
-  '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
-  `
+  console.log(
+    '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
+    `
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 8px 12px;
@@ -82,7 +81,7 @@ console.log(
     font-size: 14px;
     font-weight: 700;
   `,
-  `
+    `
     background: #111827;
     color: #93c5fd;
     padding: 8px 8px;
@@ -90,13 +89,13 @@ console.log(
     font-size: 13px;
     font-weight: 600;
   `
-);
+  );
 
   return () => {
-      initEventTracker();
-      handleSearch();
-      handleCollection();
-      handleCart();
-      handleForms();
-    };
+    initEventTracker();
+    handleSearch();
+    handleCollection();
+    handleCart();
+    handleForms();
+  };
 }

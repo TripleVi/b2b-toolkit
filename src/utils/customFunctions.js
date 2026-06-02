@@ -62,34 +62,14 @@ function getParams(fn) {
   return params;
 }
 
-function addRunnableFn(fn) {
-  const key = 'runnableFns';
-  const body = validateCustomFn(fn);
-  const customFns = getCustomFns(key);
-  customFns.set(fn.name, body);
-  saveCustomFns(key, customFns);
-}
-
-function registerFn(fn) {
-  const key = 'registeredFns';
-  const body = validateCustomFn(fn);
-  const params = getParams(fn);
-  const customFns = getCustomFns(key);
-  customFns.set(fn.name, { params, body });
-  saveCustomFns(key, customFns);
-}
-
 function getCustomFns(key) {
   const storage = createStorage(Shopify.theme.schema_name);
   return new Map(storage.get(key) ?? []);
 }
 
-function getRunnableFns(key) {
-  const runnableFns = getCustomFns('runnableFns');
-}
-
-function getRegisteredFns(key) {
-  const registeredFns = getCustomFns('registeredFns');
+function getCustomFn(key, name) {
+  const customFns = getCustomFns(key);
+  return customFns.get(name) && new Function(customFns.get(name));
 }
 
 function saveCustomFns(key, customFns) {
@@ -97,29 +77,74 @@ function saveCustomFns(key, customFns) {
   storage.set(key, [...customFns]);
 }
 
-function getCustomFnNames() {
-  const storage = createStorage(Shopify.theme.schema_name);
-  return new Map(storage.get('customFns') ?? []).keys().toArray();
-}
-
-function getCustomFn(name) { 
-  const customFns = getCustomFns();
-  return customFns.get(name) && new Function(customFns.get(name));
-}
-
-function removeCustomFn(name) {
-  const customFns = getCustomFns();
-  const storage = createStorage(Shopify.theme.schema_name);
+function removeCustomFn(key, name) {
+  const customFns = getCustomFns(key);
   if (customFns.delete(name)) {
-    storage.set('customFns', [...customFns]);
+    saveCustomFns(key, customFns);
     return true;
   }
   return false;
 }
 
+const RUNNABLE_KEY = 'runnableFns';
+const REGISTERED_KEY = 'registeredFns';
+
+function addRunnableFn(fn) {
+  const body = validateCustomFn(fn);
+  const customFns = getCustomFns(RUNNABLE_KEY);
+  customFns.set(fn.name, body);
+  saveCustomFns(RUNNABLE_KEY, customFns);
+}
+
+function registerFn(fn) {
+  const body = validateCustomFn(fn);
+  const params = getParams(fn);
+  const customFns = getCustomFns(REGISTERED_KEY);
+  customFns.set(fn.name, { params, body });
+  saveCustomFns(REGISTERED_KEY, customFns);
+}
+
+function getRunnableFns(key) {
+  return getCustomFns(RUNNABLE_KEY);
+}
+
+function getRegisteredFns(key) {
+  return getCustomFns(REGISTERED_KEY);
+}
+
+function removeRunnableFn(name) {
+  return removeCustomFn(RUNNABLE_KEY, name);
+}
+
+function removeRegisteredFn(name) {
+  return removeCustomFn(REGISTERED_KEY, name);
+}
+
+function execute() {
+  const registeredFns = getRegisteredFns();
+  registeredFns.forEach(({ params, body }, name) => {
+    if (window[name]) {
+      console.warn(
+        `Skipping registration of function "${name}" as it already exists on global scope`
+      );
+      return;
+    }
+    window[name] = new Function(...params, body);
+  });
+
+  const runnableFns = getRunnableFns();
+  runnableFns.forEach(body => {
+    const fn = new Function(body);
+    fn();
+  });
+}
+
 export default {
   addRunnableFn,
   registerFn,
-  getCustomFn,
-  removeCustomFn
+  getRunnableFns,
+  getRegisteredFns,
+  removeRunnableFn,
+  removeRegisteredFn,
+  execute,
 };
