@@ -568,7 +568,7 @@
       ${fns.join()}
     `;
 	}
-	var DOM_ATTRS$1 = {
+	var DOM_ATTRS = {
 		PRODUCT_ID: "bss-b2b-product-id",
 		PRODUCT_PRICE: "bss-b2b-product-price",
 		PRODUCT_QB_ID: "bss-b2b-product-qb-id",
@@ -710,9 +710,38 @@
 	function isHighlighted(el) {
 		return el.classList.contains("highlight");
 	}
+	function showToast(message) {
+		const toast = document.createElement("div");
+		toast.innerText = message;
+		toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 9999;
+    font-size: 14px;
+    `;
+		document.body.appendChild(toast);
+		requestAnimationFrame(() => {
+			toast.style.opacity = "1";
+			toast.style.transform = "translateX(-50%) translateY(0)";
+		});
+		setTimeout(() => {
+			toast.style.opacity = "0";
+			toast.style.transform = "translateX(-50%) translateY(-10px)";
+			setTimeout(() => toast.remove(), 300);
+		}, 2500);
+	}
 	function handleSearch() {
-		document.querySelectorAll(`[${DOM_ATTRS$1.SEARCHBAR_OBSERVER_ID}]`).forEach((container) => {
-			const searchId = container.getAttribute(DOM_ATTRS$1.SEARCHBAR_OBSERVER_ID);
+		document.querySelectorAll(`[${DOM_ATTRS.SEARCHBAR_OBSERVER_ID}]`).forEach((container) => {
+			const searchId = container.getAttribute(DOM_ATTRS.SEARCHBAR_OBSERVER_ID);
 			const searchBar = BSS_B2B.support.search[searchId] ?? {
 				target: container,
 				cards: {}
@@ -722,7 +751,7 @@
 				delete searchBar.cards[key];
 			}
 			const cards = handleProductCards({
-				cardEls: queryUnhandled(`[${DOM_ATTRS$1.PRODUCT_QB_ID}]`, container),
+				cardEls: queryUnhandled(`[${DOM_ATTRS.PRODUCT_QB_ID}]`, container),
 				uiContext: UI_CONTEXT.SEARCH
 			});
 			searchBar.cards = {
@@ -740,7 +769,7 @@
 			delete collection[key];
 		}
 		const cards = handleProductCards({
-			cardEls: queryUnhandled(`[${DOM_ATTRS$1.PRODUCT_QB_ID}]`),
+			cardEls: queryUnhandled(`[${DOM_ATTRS.PRODUCT_QB_ID}]`),
 			uiContext: UI_CONTEXT.COLLECTION
 		});
 		BSS_B2B.support.collection = {
@@ -755,7 +784,7 @@
 		cardEls.forEach((cardEl) => {
 			if (!cardEl.isConnected || isHandled(cardEl)) return;
 			markAsHandled(cardEl);
-			const id = +cardEl.getAttribute(DOM_ATTRS$1.PRODUCT_QB_ID);
+			const id = +cardEl.getAttribute(DOM_ATTRS.PRODUCT_QB_ID);
 			const product = BSS_B2B.storage.productStorage.get(id);
 			if (!product) {
 				notFoundProducts.push({
@@ -765,9 +794,9 @@
 				return;
 			}
 			setUIContext(cardEl, uiContext);
-			const priceEls = [...cardEl.querySelectorAll(`[${DOM_ATTRS$1.PRODUCT_PRICE}][${DOM_ATTRS$1.PRODUCT_ID}="${id}"]`)];
+			const priceEls = [...cardEl.querySelectorAll(`[${DOM_ATTRS.PRODUCT_PRICE}][${DOM_ATTRS.PRODUCT_ID}="${id}"]`)];
 			let currVariantId = product?.currentVariant?.id;
-			if (!currVariantId && priceEls.length) currVariantId = +priceEls[0].getAttribute(DOM_ATTRS$1.VARIANT_ID);
+			if (!currVariantId && priceEls.length) currVariantId = +priceEls[0].getAttribute(DOM_ATTRS.VARIANT_ID);
 			if (!currVariantId) currVariantId = product.variants[0].id;
 			const currVariant = BSS_B2B.storage.variantStorage.get(currVariantId);
 			const availableRules = getAvailableRules({ productId: id });
@@ -776,7 +805,7 @@
 				target: cardEl,
 				product,
 				currVariant,
-				quickViewBtns: [...cardEl.querySelectorAll(`[${DOM_ATTRS$1.QUICKVIEW_BTN}]`)],
+				quickViewBtns: [...cardEl.querySelectorAll(`[${DOM_ATTRS.QUICKVIEW_BTN}]`)],
 				appliedRules,
 				availableRules,
 				priceEls
@@ -799,7 +828,7 @@
 		const notFoundForms = [];
 		formIds = formIds ?? BSS_B2B.storage.productFormStorage.store.keys().toArray();
 		formIds.forEach((formId) => {
-			const formEl = document.querySelector(`[${DOM_ATTRS$1.PRODUCT_FORM_ID}="${formId}"]`);
+			const formEl = document.querySelector(`[${DOM_ATTRS.PRODUCT_FORM_ID}="${formId}"]`);
 			if (!formEl?.isConnected) return;
 			markAsHandled(formEl);
 			const productForm = BSS_B2B.storage.productFormStorage.get(formId);
@@ -826,7 +855,7 @@
 				appliedRules,
 				printInfo: () => console.log(BSS_B2B.support.forms[location][formId])
 			});
-			const priceEls = [...formEl.querySelectorAll(`[${DOM_ATTRS$1.VARIANT_PRICE}]`)];
+			const priceEls = [...formEl.querySelectorAll(`[${DOM_ATTRS.VARIANT_PRICE}]`)];
 			const cartForms = [...formEl.querySelectorAll(productSelectors.product_cart_form)].map((cartFormEl) => {
 				return {
 					target: cartFormEl,
@@ -865,14 +894,14 @@
 		for (const [key, item] of Object.entries(cart.items)) if (!item.target.isConnected || !isHandled(item.target)) delete cart.items[key];
 		const cartSelectors = getCartSelectors();
 		for (const [cartKey, cartItem] of BSS_B2B.storage.cartStorage.getAll()) {
-			const cartItemEl = document.querySelector(`[${DOM_ATTRS$1.CART_ITEM_KEY}="${cartKey}"]`);
+			const cartItemEl = document.querySelector(`[${DOM_ATTRS.CART_ITEM_KEY}="${cartKey}"]`);
 			if (!cartItemEl?.isConnected) continue;
 			markAsHandled(cartItemEl);
 			const { product_id: productId, variant_id: variantId } = cartItem;
 			const availableRules = getAvailableRules({ cartKey });
 			const appliedRules = getAppliedRules({ cartKey });
-			const originalPriceEls = [...cartItemEl.querySelectorAll(`[${DOM_ATTRS$1.CART_ITEM_ORIGINAL_PRICE}]`)];
-			const finalLinePriceEls = [...cartItemEl.querySelectorAll(`[${DOM_ATTRS$1.CART_FINAL_LINE_PRICE}]`)];
+			const originalPriceEls = [...cartItemEl.querySelectorAll(`[${DOM_ATTRS.CART_ITEM_ORIGINAL_PRICE}]`)];
+			const finalLinePriceEls = [...cartItemEl.querySelectorAll(`[${DOM_ATTRS.CART_FINAL_LINE_PRICE}]`)];
 			const changeQuantityEls = [...cartItemEl.querySelectorAll(cartSelectors.button_change_quantity)];
 			cart.items[cartKey] = {
 				target: cartItemEl,
@@ -1011,16 +1040,16 @@
 		});
 		productObserver.takeLatest("QuickviewLoaded", (ctx) => {
 			handleForms(ctx.payload.formIdMapProducts.keys().toArray());
-			console.info("Quick view loaded", { ctx });
+			BSS_B2B.logger.log("Quick view loaded", { ctx });
 		}, { priority: MAX_HOOK_PRIORITY });
 		productObserver.usePre("SearchBarLoaded", (ctx, next) => {
-			console.log("handle search bar", ctx);
+			BSS_B2B.logger.log("handle search bar", { ctx });
 			next();
 		});
 		productObserver.takeEvery("SearchBarLoaded", (ctx) => {
 			const { notExistProductIds } = ctx.payload;
 			handleSearch();
-			console.info("Search bar loaded", { notExistProductIds });
+			BSS_B2B.logger.log("Search bar loaded", { notExistProductIds });
 		}, { priority: MIN_HOOK_PRIORITY });
 		productObserver.takeLatest("VariantChange", (ctx) => {
 			const { formId, currentVariant } = ctx.payload;
@@ -1030,7 +1059,7 @@
 		productObserver.takeEvery("LoadedLazyProduct", () => {
 			handleSearch();
 			handleCollection();
-			console.info("process LoadedLazyProduct");
+			BSS_B2B.logger.log("process LoadedLazyProduct");
 		}, { priority: MIN_HOOK_PRIORITY });
 		cartObserver.takeLatest("CartUpdate", () => {
 			handleCart();
@@ -1053,10 +1082,10 @@
 			productId = ((handle && collectionProducts.find((p) => p.handle === handle)) ?? productCache.get(handle))?.id;
 		}
 		if (productId) {
-			console.info(`[${tag}][PID: ${productId}] Start loading quick view`);
+			BSS_B2B.logger.log(`[${tag}][PID: ${productId}] Start loading quick view`);
 			return;
 		}
-		console.error("[QuickView] No product available for form", { event });
+		BSS_B2B.logger.error("[QuickView] No product available for form", { event });
 	}
 	function processProductCards() {
 		window.dispatchEvent(new Event("scroll"));
