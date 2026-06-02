@@ -845,7 +845,19 @@
 				variantId: currVariantId,
 				formEl
 			});
-			const location = productForm.location;
+			let location;
+			switch (productForm.location) {
+				case "quickview":
+					location = "quickView";
+					break;
+				case "feature":
+					location = "featured";
+					break;
+				case "quick_order_list":
+					location = "quickOrderList";
+					break;
+				default: location = "main";
+			}
 			const availableRules = getAvailableRules({ formId });
 			const appliedRules = getAppliedRules({ formId });
 			handleElementBadge({
