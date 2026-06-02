@@ -3,12 +3,7 @@ import { DOM_ATTRS } from '../constants/domAttributes';
 import { UI_CONTEXT } from '../constants/ui';
 import { getAppliedRules, getAvailableRules } from './b2b';
 import { getCartSelectors, getProductSelectors } from './selectors';
-import {
-  handleElementBadge,
-  highlightEls,
-  isHighlighted,
-  unhighlightEls,
-} from './uiElements';
+import { handleElementBadge, highlightEls, unhighlightEls } from './uiElements';
 
 // export function highlightSearch() {
 export function handleSearch() {
@@ -129,10 +124,7 @@ export function handleForms(formIds) {
 
   for (const [location, locationForms] of Object.entries(forms)) {
     for (const [formId, locationForm] of Object.entries(locationForms)) {
-      if (
-        !locationForm.target.isConnected ||
-        !isHandled(locationForm.target)
-      )
+      if (!locationForm.target.isConnected || !isHandled(locationForm.target))
         delete locationForms[formId];
     }
   }
@@ -164,7 +156,20 @@ export function handleForms(formIds) {
       );
     }
 
-    const location = productForm.location;
+    let location;
+    switch (productForm.location) {
+      case 'quickview':
+        location = 'quickView';
+        break;
+      case 'feature':
+        location = 'featured';
+        break;
+      case 'quick_order_list':
+        location = 'quickOrderList';
+        break;
+      default:
+        location = 'main';
+    }
 
     const availableRules = getAvailableRules({ formId });
     const appliedRules = getAppliedRules({ formId });
@@ -251,7 +256,6 @@ export function handleCart() {
     const availableRules = getAvailableRules({ cartKey });
     const appliedRules = getAppliedRules({ cartKey });
 
-
     const originalPriceEls = [
       ...cartItemEl.querySelectorAll(`[${DOM_ATTRS.CART_ITEM_ORIGINAL_PRICE}]`),
     ];
@@ -303,9 +307,18 @@ export function highlightSearch(force = false) {
   for (const searchBar of Object.values(BSS_B2B.support.search)) {
     const cards = Object.values(searchBar.cards);
     highlightEls([searchBar.target], 'search');
-    highlightEls(cards.map(c => c.target), 'search.card');
-    highlightEls(cards.flatMap(c => c.priceEls), 'search.price');
-    highlightEls(cards.flatMap(c => c.quickViewBtns), 'search.quickViewBtn');
+    highlightEls(
+      cards.map(c => c.target),
+      'search.card'
+    );
+    highlightEls(
+      cards.flatMap(c => c.priceEls),
+      'search.price'
+    );
+    highlightEls(
+      cards.flatMap(c => c.quickViewBtns),
+      'search.quickViewBtn'
+    );
   }
 }
 
@@ -348,12 +361,17 @@ export function unhighlightCollection(force = false) {
 export function highlightForms(force = false) {
   // if (!force && config.get('forms.highlightElements')) return;
   config.set('forms.highlightElements', true);
-  for (const [location, locationForms] of Object.entries(BSS_B2B.support.forms)) {
+  for (const [location, locationForms] of Object.entries(
+    BSS_B2B.support.forms
+  )) {
     for (const form of Object.values(locationForms)) {
       highlightEls([form.target], `form.${location}`);
       highlightEls(form.priceEls, `form.${location}.price`);
       highlightEls(form.changeQuantityEls, `form.${location}.changeQuantity`);
-      highlightEls(form.cartForms.map(cf => cf.target), `form.${location}.cartForm`);
+      highlightEls(
+        form.cartForms.map(cf => cf.target),
+        `form.${location}.cartForm`
+      );
     }
   }
 }
