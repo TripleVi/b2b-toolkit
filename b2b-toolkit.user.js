@@ -300,6 +300,115 @@
 		}
 		return rules;
 	}
+	function validateCustomFn(fn) {
+		if (typeof fn !== "function") throw new TypeError("Expected a function as argument");
+		if (fn.name === "") throw new Error("Function must have a name");
+		if (fn.name in window) {
+			if (typeof window[fn.name] === "function") throw new Error(`Function "${fn.name}" already exists on global scope`);
+			throw new Error(`Global name "${fn.name}" is already in use`);
+		}
+		const str = fn.toString();
+		if (!str.endsWith("}")) throw new Error("Function must use a block body `{}` (no implicit return)");
+		return str.slice(str.indexOf("{") + 1, str.lastIndexOf("}"));
+	}
+	function getParams(fn) {
+		const argsStr = fn.toString().match(/\(([\s\S]*?)\)/)?.[1] || "";
+		const params = [];
+		let current = "";
+		let depth = 0;
+		let inString = false;
+		let stringChar = "";
+		for (let i = 0; i < argsStr.length; i++) {
+			const char = argsStr[i];
+			if (inString) {
+				current += char;
+				if (char === stringChar && argsStr[i - 1] !== "\\") inString = false;
+				continue;
+			}
+			if (char === "\"" || char === "'" || char === "`") {
+				inString = true;
+				stringChar = char;
+				current += char;
+				continue;
+			}
+			if (char === "(" || char === "{" || char === "[") depth++;
+			if (char === ")" || char === "}" || char === "]") depth--;
+			if (char === "," && depth === 0) {
+				params.push(current.trim());
+				current = "";
+				continue;
+			}
+			current += char;
+		}
+		if (current.trim()) params.push(current.trim());
+		return params;
+	}
+	function getCustomFns$1(key) {
+		const storage = createStorage(Shopify.theme.schema_name);
+		return new Map(storage.get(key) ?? []);
+	}
+	function saveCustomFns(key, customFns) {
+		createStorage(Shopify.theme.schema_name).set(key, [...customFns]);
+	}
+	function removeCustomFn(key, name) {
+		const customFns = getCustomFns$1(key);
+		if (customFns.delete(name)) {
+			saveCustomFns(key, customFns);
+			return true;
+		}
+		return false;
+	}
+	var RUNNABLE_KEY = "runnableFns";
+	var REGISTERED_KEY = "registeredFns";
+	function addRunnableFn(fn) {
+		const body = validateCustomFn(fn);
+		const customFns = getCustomFns$1(RUNNABLE_KEY);
+		customFns.set(fn.name, body);
+		saveCustomFns(RUNNABLE_KEY, customFns);
+	}
+	function registerFn(fn) {
+		const body = validateCustomFn(fn);
+		const params = getParams(fn);
+		const customFns = getCustomFns$1(REGISTERED_KEY);
+		customFns.set(fn.name, {
+			params,
+			body
+		});
+		saveCustomFns(REGISTERED_KEY, customFns);
+	}
+	function getRunnableFns(key) {
+		return getCustomFns$1(RUNNABLE_KEY);
+	}
+	function getRegisteredFns(key) {
+		return getCustomFns$1(REGISTERED_KEY);
+	}
+	function removeRunnableFn(name) {
+		return removeCustomFn(RUNNABLE_KEY, name);
+	}
+	function removeRegisteredFn(name) {
+		return removeCustomFn(REGISTERED_KEY, name);
+	}
+	function execute() {
+		getRegisteredFns().forEach(({ params, body }, name) => {
+			if (window[name]) {
+				console.warn(`Skipping registration of function "${name}" as it already exists on global scope`);
+				return;
+			}
+			window[name] = new Function(...params, body);
+		});
+		getRunnableFns().forEach((body) => {
+			new Function(body)();
+		});
+	}
+	var customFunctions_default = {
+		addRunnableFn,
+		registerFn,
+		getRunnableFns,
+		getRegisteredFns,
+		removeRunnableFn,
+		removeRegisteredFn,
+		execute
+	};
 	var DEFAULTS = {
 		collection: {
 			selectorCard: ":not(*)",
@@ -967,93 +1076,6 @@
 	function processCart() {
 		document.dispatchEvent(new Event("bss_b2b:CustomCartUpdate"));
 	}
-	function validateCustomFn(fn) {
-		if (typeof fn !== "function") throw new TypeError("Expected a function as argument");
-		if (fn.name === "") throw new Error("Function must have a name");
-		if (fn.name in window) {
-			if (typeof window[fn.name] === "function") throw new Error(`Function "${fn.name}" already exists on global scope`);
-			throw new Error(`Global name "${fn.name}" is already in use`);
-		}
-		const str = fn.toString();
-		if (!str.endsWith("}")) throw new Error("Function must use a block body `{}` (no implicit return)");
-		return str.slice(str.indexOf("{") + 1, str.lastIndexOf("}"));
-	}
-	function getParams(fn) {
-		const argsStr = fn.toString().match(/\(([\s\S]*?)\)/)?.[1] || "";
-		const params = [];
-		let current = "";
-		let depth = 0;
-		let inString = false;
-		let stringChar = "";
-		for (let i = 0; i < argsStr.length; i++) {
-			const char = argsStr[i];
-			if (inString) {
-				current += char;
-				if (char === stringChar && argsStr[i - 1] !== "\\") inString = false;
-				continue;
-			}
-			if (char === "\"" || char === "'" || char === "`") {
-				inString = true;
-				stringChar = char;
-				current += char;
-				continue;
-			}
-			if (char === "(" || char === "{" || char === "[") depth++;
-			if (char === ")" || char === "}" || char === "]") depth--;
-			if (char === "," && depth === 0) {
-				params.push(current.trim());
-				current = "";
-				continue;
-			}
-			current += char;
-		}
-		if (current.trim()) params.push(current.trim());
-		return params;
-	}
-	function addRunnableFn(fn) {
-		const key = "runnableFns";
-		const body = validateCustomFn(fn);
-		const customFns = getCustomFns$1(key);
-		customFns.set(fn.name, body);
-		saveCustomFns(key, customFns);
-	}
-	function registerFn(fn) {
-		const key = "registeredFns";
-		const body = validateCustomFn(fn);
-		const params = getParams(fn);
-		const customFns = getCustomFns$1(key);
-		customFns.set(fn.name, {
-			params,
-			body
-		});
-		saveCustomFns(key, customFns);
-	}
-	function getCustomFns$1(key) {
-		const storage = createStorage(Shopify.theme.schema_name);
-		return new Map(storage.get(key) ?? []);
-	}
-	function saveCustomFns(key, customFns) {
-		createStorage(Shopify.theme.schema_name).set(key, [...customFns]);
-	}
-	function getCustomFn(name) {
-		const customFns = getCustomFns$1();
-		return customFns.get(name) && new Function(customFns.get(name));
-	}
-	function removeCustomFn(name) {
-		const customFns = getCustomFns$1();
-		const storage = createStorage(Shopify.theme.schema_name);
-		if (customFns.delete(name)) {
-			storage.set("customFns", [...customFns]);
-			return true;
-		}
-		return false;
-	}
-	var customFunctions_default = {
-		addRunnableFn,
-		registerFn,
-		getCustomFn,
-		removeCustomFn
-	};
 	function bootstrapApp() {
 		window.bssB2BHooks = window.bssB2BHooks ?? {
 			actions: {},
@@ -1062,12 +1084,7 @@
 		window.BSS_B2B = window.BSS_B2B ?? {};
 		BSS_B2B.addAction = (tag, callback) => bssB2BHooks.actions[tag] = callback;
 		BSS_B2B.addFilter = (tag, callback) => bssB2BHooks.filters[tag] = callback;
-		const registeredFns = getCustomFns("registeredFns");
-		const runnableFns = getCustomFns("runnableFns");
-		registeredFns.forEach(({ params, body }, name) => window[name] = new Function(...params, body));
-		runnableFns.forEach((body) => {
-			new Function(body)();
-		});
+		customFunctions_default.execute();
 		if (customSelectors.hasData()) customSelectors.init();
 		const shopStorage = createStorage(Shopify.theme.schema_name);
 		BSS_B2B.support = {
