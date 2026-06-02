@@ -74,42 +74,42 @@
 	}
 	var DEFAULTS$1 = {
 		search: {
-			color: "blue",
-			card: { color: "yellow" },
-			price: { color: "red" },
-			quickViewBtn: { color: "green" },
+			color: "#2563EB",
+			card: { color: "#60A5FA" },
+			price: { color: "#DC2626" },
+			quickViewBtn: { color: "#10B981" },
 			highlightElements: true
 		},
 		collection: {
-			color: "green",
-			card: { color: "orange" },
-			price: { color: "red" },
-			quickViewBtn: { color: "green" },
+			color: "#16A34A",
+			card: { color: "#4ADE80" },
+			price: { color: "#DC2626" },
+			quickViewBtn: { color: "#10B981" },
 			highlightElements: true
 		},
 		cart: {
-			card: { color: "orange" },
-			originalPrice: { color: "gray" },
-			linePrice: { color: "red" },
-			subtotal: { color: "red" },
+			card: { color: "#F97316" },
+			originalPrice: { color: "#6B7280" },
+			linePrice: { color: "#DC2626" },
+			subtotal: { color: "#B91C1C" },
 			highlightElements: true
 		},
 		form: {
 			main: {
-				color: "purple",
-				price: { color: "red" }
+				color: "#7C3AED",
+				price: { color: "#DC2626" }
 			},
 			quickView: {
-				color: "pink",
-				price: { color: "red" }
+				color: "#EC4899",
+				price: { color: "#DC2626" }
 			},
 			featured: {
-				color: "blue",
-				price: { color: "red" }
+				color: "#06B6D4",
+				price: { color: "#DC2626" }
 			},
 			quickOrderList: {
-				color: "teal",
-				price: { color: "red" }
+				color: "#0D9488",
+				price: { color: "#DC2626" }
 			},
 			highlightElements: true
 		}
@@ -900,10 +900,7 @@
 		highlightCart();
 	}
 	function highlightSearch(force = false) {
-		if (!force) {
-			if (config.get("search.highlightElements")) return;
-			config.set("search.highlightElements", true);
-		}
+		config.set("search.highlightElements", true);
 		for (const searchBar of Object.values(BSS_B2B.support.search)) {
 			const cards = Object.values(searchBar.cards);
 			highlightEls([searchBar.target], "search");
@@ -913,10 +910,7 @@
 		}
 	}
 	function unhighlightSearch(force = false) {
-		if (!force) {
-			if (!config.get("search.highlightElements")) return;
-			config.set("search.highlightElements", false);
-		}
+		config.set("search.highlightElements", false);
 		for (const searchBar of Object.values(BSS_B2B.support.search)) {
 			const cards = Object.values(searchBar.cards);
 			unhighlightEls([
@@ -945,12 +939,12 @@
 	}
 	function highlightForms(force = false) {
 		config.set("forms.highlightElements", true);
-		for (const locationForms of Object.values(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) highlightEls([
-			form.target,
-			...form.priceEls,
-			...form.changeQuantityEls,
-			...form.cartForms.map((cf) => cf.target)
-		]);
+		for (const [location, locationForms] of Object.entries(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) {
+			highlightEls([form.target], `form.${location}`);
+			highlightEls(form.priceEls, `form.${location}.price`);
+			highlightEls(form.changeQuantityEls, `form.${location}.changeQuantity`);
+			highlightEls(form.cartForms.map((cf) => cf.target), `form.${location}.cartForm`);
+		}
 	}
 	function unhighlightForms(force = false) {
 		config.set("forms.highlightElements", false);
@@ -968,10 +962,10 @@
 			highlightEls([item.target], "cart.card");
 			highlightEls(item.originalPriceEls, "cart.originalPrice");
 			highlightEls(item.finalLinePriceEls, "cart.linePrice");
-			highlightEls(item.changeQuantityEls);
+			highlightEls(item.changeQuantityEls, "cart.changeQuantity");
 		}
+		highlightEls(cart.subTotalEls, "cart.subtotal");
 		highlightEls([
-			...cart.subTotalEls,
 			...cart.openMiniCartBtns,
 			...cart.checkoutEls,
 			...cart.addToCartBtns
