@@ -1,4 +1,9 @@
-import { handleCart, handleCollection, handleForms, handleSearch } from "../utils/highlightElements";
+import {
+  handleCart,
+  handleCollection,
+  handleForms,
+  handleSearch,
+} from '../utils/highlightElements';
 
 export function initEventTracker() {
   const MIN_HOOK_PRIORITY = 999999999;

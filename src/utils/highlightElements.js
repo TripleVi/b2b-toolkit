@@ -296,10 +296,10 @@ export function handleCart() {
 }
 
 export function highlightSearch(force = false) {
-  if (!force) {
-    if (config.get('search.highlightElements')) return;
-    config.set('search.highlightElements', true);
-  }
+  // if (!force) {
+  //   if (config.get('search.highlightElements')) return;
+  // }
+  config.set('search.highlightElements', true);
   for (const searchBar of Object.values(BSS_B2B.support.search)) {
     const cards = Object.values(searchBar.cards);
     highlightEls([searchBar.target], 'search');
@@ -310,10 +310,10 @@ export function highlightSearch(force = false) {
 }
 
 export function unhighlightSearch(force = false) {
-  if (!force) {
-    if (!config.get('search.highlightElements')) return;
-    config.set('search.highlightElements', false);
-  }
+  // if (!force) {
+  //   if (!config.get('search.highlightElements')) return;
+  // }
+  config.set('search.highlightElements', false);
   for (const searchBar of Object.values(BSS_B2B.support.search)) {
     const cards = Object.values(searchBar.cards);
     unhighlightEls([
@@ -348,14 +348,12 @@ export function unhighlightCollection(force = false) {
 export function highlightForms(force = false) {
   // if (!force && config.get('forms.highlightElements')) return;
   config.set('forms.highlightElements', true);
-  for (const locationForms of Object.values(BSS_B2B.support.forms)) {
+  for (const [location, locationForms] of Object.entries(BSS_B2B.support.forms)) {
     for (const form of Object.values(locationForms)) {
-      highlightEls([
-        form.target,
-        ...form.priceEls,
-        ...form.changeQuantityEls,
-        ...form.cartForms.map(cf => cf.target),
-      ]);
+      highlightEls([form.target], `form.${location}`);
+      highlightEls(form.priceEls, `form.${location}.price`);
+      highlightEls(form.changeQuantityEls, `form.${location}.changeQuantity`);
+      highlightEls(form.cartForms.map(cf => cf.target), `form.${location}.cartForm`);
     }
   }
 }
@@ -383,10 +381,10 @@ export function highlightCart(force = false) {
     highlightEls([item.target], 'cart.card');
     highlightEls(item.originalPriceEls, 'cart.originalPrice');
     highlightEls(item.finalLinePriceEls, 'cart.linePrice');
-    highlightEls(item.changeQuantityEls);
+    highlightEls(item.changeQuantityEls, 'cart.changeQuantity');
   }
+  highlightEls(cart.subTotalEls, 'cart.subtotal');
   highlightEls([
-    ...cart.subTotalEls,
     ...cart.openMiniCartBtns,
     ...cart.checkoutEls,
     ...cart.addToCartBtns,
