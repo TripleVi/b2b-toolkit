@@ -1,9 +1,11 @@
+import { DOM_ATTRS } from '../constants/domAttributes';
 import {
   handleCart,
   handleCollection,
   handleForms,
   handleSearch,
 } from '../utils/highlightElements';
+import { showToast } from '../utils/uiElements';
 
 export function initEventTracker() {
   const MIN_HOOK_PRIORITY = 999999999;
@@ -21,13 +23,13 @@ export function initEventTracker() {
     ctx => {
       const formIds = ctx.payload.formIdMapProducts.keys().toArray();
       handleForms(formIds);
-      console.info('Quick view loaded', { ctx });
+      BSS_B2B.logger.log('Quick view loaded', { ctx });
     },
     { priority: MAX_HOOK_PRIORITY }
   );
 
   productObserver.usePre('SearchBarLoaded', (ctx, next) => {
-    console.log('handle search bar', ctx);
+    BSS_B2B.logger.log('handle search bar', { ctx });
     next();
   });
 
@@ -36,7 +38,7 @@ export function initEventTracker() {
     ctx => {
       const { notExistProductIds } = ctx.payload;
       handleSearch();
-      console.info('Search bar loaded', { notExistProductIds });
+      BSS_B2B.logger.log('Search bar loaded', { notExistProductIds });
     },
     { priority: MIN_HOOK_PRIORITY }
   );
@@ -56,7 +58,7 @@ export function initEventTracker() {
     () => {
       handleSearch();
       handleCollection();
-      console.info('process LoadedLazyProduct');
+      BSS_B2B.logger.log('process LoadedLazyProduct');
     },
     { priority: MIN_HOOK_PRIORITY }
   );
@@ -94,8 +96,8 @@ function getQuickViewInfo(event) {
     productId = product?.id;
   }
   if (productId) {
-    console.info(`[${tag}][PID: ${productId}] Start loading quick view`);
+    BSS_B2B.logger.log(`[${tag}][PID: ${productId}] Start loading quick view`);
     return;
   }
-  console.error('[QuickView] No product available for form', { event });
+  BSS_B2B.logger.error('[QuickView] No product available for form', { event });
 }
