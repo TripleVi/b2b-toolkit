@@ -72,7 +72,7 @@ export default function bootstrapApp() {
   });
 
   console.log(
-    '%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨',
+    '%c 🛠️ B2B Toolkit v0.1.0 %c by LV ✨',
     `
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     color: white;
