@@ -1,3 +1,4 @@
+import { config } from '../config';
 import { createStorage } from './storage';
 
 const DEFAULTS = {
@@ -98,6 +99,7 @@ function createCustomSelectors() {
       const selectors = get();
       return selectors[page] ?? config;
     });
+    config.set('customSelector.enabled', true);
     return publicSelectors;
   }
 
@@ -111,7 +113,15 @@ function createCustomSelectors() {
   }
 
   function hasData() {
-    return !!storage.get(STORAGE_KEY);
+    return !!get();
+  }
+
+  function isEnabled() {
+    return config.get('customSelector.enabled');
+  }
+
+  function isDisabled() {
+    return !isEnabled();
   }
 
   function save() {
@@ -123,22 +133,11 @@ function createCustomSelectors() {
   }
 
   function enable() {
-    delete bssB2BHooks.filters[tag];
-    addFilter(tag, (config, { page }) => {
-      const customSelectors = get();
-      return customSelectors[page] ?? config;
-    });
+    config.set('customSelector.enabled', true);
   }
 
   function disable() {
-    delete bssB2BHooks.filters[tag];
-  }
-
-  function destroy() {
-    publicSelectors = undefined;
-    storage.remove(STORAGE_KEY);
-    delete BSS_B2B.support.customSelectors;
-    delete bssB2BHooks.filters[tag];
+    config.reset('customSelector.enabled');
   }
 
   return {
@@ -149,8 +148,9 @@ function createCustomSelectors() {
     save,
     enable,
     disable,
-    destroy,
     hasData,
+    isEnabled,
+    isDisabled,
   };
 }
 
@@ -161,7 +161,7 @@ function getInstance() {
   return _instance;
 }
 
-export const customSelectors = {
+export const customSelector = {
   get values() {
     return getInstance().values;
   },
@@ -171,6 +171,8 @@ export const customSelectors = {
   disable: () => getInstance().disable(),
   destroy: () => getInstance().destroy(),
   hasData: () => getInstance().hasData(),
+  isEnabled: () => getInstance().isEnabled(),
+  isDisabled: () => getInstance().isDisabled(),
 };
 
 export function generateCode() {
@@ -186,7 +188,7 @@ export function generateCode() {
     fn();
   });
   return `
-      const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelectors)};
+      const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelector.values)};
       function configTheme(config, { page }) {
         return customSelectors[page] ?? config;
       }

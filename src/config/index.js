@@ -1,22 +1,28 @@
 import { createStorage } from '../utils/storage.js';
 
 const DEFAULTS = {
+  customFn: {
+    enabled: false,
+  },
+  customSelector: {
+    enabled: false,
+  },
   search: {
-    color: '#2563EB', // blue-600
+    color: '#2563EB',
     card: { color: '#60A5FA' },
     price: { color: '#DC2626' },
     quickViewBtn: { color: '#10B981' },
     highlightElements: true,
   },
   collection: {
-    color: '#16A34A', // green-600
+    color: '#16A34A',
     card: { color: '#4ADE80' },
     price: { color: '#DC2626' },
     quickViewBtn: { color: '#10B981' },
     highlightElements: true,
   },
   cart: {
-    card: { color: '#F97316' }, // orange-500
+    card: { color: '#F97316' },
     originalPrice: { color: '#6B7280' },
     linePrice: { color: '#DC2626' },
     subtotal: { color: '#B91C1C' },
@@ -24,19 +30,19 @@ const DEFAULTS = {
   },
   form: {
     main: {
-      color: '#7C3AED', // violet-600
+      color: '#7C3AED',
       price: { color: '#DC2626' },
     },
     quickView: {
-      color: '#EC4899', // pink-500
+      color: '#EC4899',
       price: { color: '#DC2626' },
     },
     featured: {
-      color: '#06B6D4', // cyan-500
+      color: '#06B6D4',
       price: { color: '#DC2626' },
     },
     quickOrderList: {
-      color: '#0D9488', // teal-600
+      color: '#0D9488',
       price: { color: '#DC2626' },
     },
     highlightElements: true,

@@ -1,7 +1,7 @@
 import { config } from '../config';
 import { getAppliedRules, getAvailableRules } from '../utils/b2b';
-import customFns from '../utils/customFunctions';
-import { customSelectors, generateCode } from '../utils/customSelectors';
+import customFn from '../utils/customFunctions';
+import { customSelector, generateCode } from '../utils/customSelectors';
 import {
   handleCart,
   handleCollection,
@@ -28,11 +28,11 @@ export default function bootstrapApp() {
   BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
   BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
 
-  customFns.execute();
-
-  if (customSelectors.hasData()) customSelectors.init();
-
   const shopStorage = createStorage(Shopify.theme.schema_name);
+
+  if (customFn.isEnabled()) customFn.execute();
+
+  if (customSelector.isEnabled()) customSelector.init();
 
   BSS_B2B.support = {
     collection: {},
@@ -47,8 +47,8 @@ export default function bootstrapApp() {
         return config.save();
       },
     },
-    customSelectors,
-    customFns,
+    customSelector,
+    customFn,
   };
 
   Object.assign(BSS_B2B.support.utils, {

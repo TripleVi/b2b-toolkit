@@ -1,3 +1,4 @@
+import { config } from '../config';
 import { createStorage } from './storage';
 
 function validateCustomFn(fn) {
@@ -139,6 +140,22 @@ function execute() {
   });
 }
 
+function isEnabled() {
+  return !!config.get('customFn.enabled');
+}
+
+function isDisabled() {
+  return !isEnabled();
+}
+
+function enable() {
+  config.set('customFn.enabled', true);
+}
+
+function disable() {
+  config.reset('customFn.enabled');
+}
+
 export default {
   addRunnableFn,
   registerFn,
@@ -147,4 +164,8 @@ export default {
   removeRunnableFn,
   removeRegisteredFn,
   execute,
+  isEnabled,
+  isDisabled,
+  enable,
+  disable,
 };

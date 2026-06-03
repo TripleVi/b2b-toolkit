@@ -33,7 +33,7 @@ export function handleSearch() {
     BSS_B2B.support.search[searchId] = searchBar;
   });
 
-  highlightSearch();
+  if (config.get('search.highlightElements')) highlightSearch();
 }
 
 export function handleCollection() {
@@ -51,7 +51,8 @@ export function handleCollection() {
   });
 
   BSS_B2B.support.collection = { ...collection, ...cards };
-  highlightCollection();
+
+  if (config.get('collection.highlightElements')) highlightCollection();
 }
 
 export function handleProductCards({ cardEls, uiContext }) {
@@ -223,7 +224,9 @@ export function handleForms(formIds) {
       availableRules,
     };
   });
-  highlightForms();
+  
+  if (config.get('form.highlightElements')) highlightForms();
+
   if (notFoundForms.length) {
     BSS_B2B.logger.error(
       'The following product forms are rendered on the page but not found in storage',
@@ -296,7 +299,7 @@ export function handleCart() {
     ...document.querySelectorAll(cartSelectors.btn_add_to_cart),
   ];
 
-  highlightCart();
+  if (config.get('cart.highlightElements')) highlightCart();
 }
 
 export function highlightSearch(force = false) {
