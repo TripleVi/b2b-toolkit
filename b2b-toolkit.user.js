@@ -1,22 +1,18 @@
 // ==UserScript==
 // @name         B2B Toolkit
-// @namespace    npm/vite-plugin-monkey
+// @namespace    https://github.com/TripleVi/b2b-toolkit
 // @version      0.1.0
 // @author       TripleVi
 // @description  Internal support toolkit for B2B Solution
 // @icon         https://vitejs.dev/logo.svg
-// @supportURL   https://github.com/TripleVi/b2b-toolkit
+// @supportURL   https://github.com/TripleVi/b2b-toolkit/issues
 // @downloadURL  https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
 // @updateURL    https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
 // @match        https://*/*
 // @exclude      *://cdn.shopify.com/*
 // @exclude      *://shop.app/*
 // @exclude      *://*.shop.app/*
-// @grant        GM_addStyle
-// @grant        GM_deleteValue
-// @grant        GM_getValue
-// @grant        GM_listValues
-// @grant        GM_setValue
+// @grant        none
 // @run-at       document-start
 // ==/UserScript==
 
@@ -1178,7 +1174,7 @@
 			unhighlightForms,
 			unhighlightCart
 		});
-		console.log("%c 🛠️ B2B Toolkit v1.0.0 %c by LV ✨", `
+		console.log("%c 🛠️ B2B Toolkit v0.1.0 %c by LV ✨", `
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 8px 12px;
