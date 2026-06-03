@@ -73,6 +73,8 @@
 		};
 	}
 	var DEFAULTS$1 = {
+		customFn: { enabled: false },
+		customSelector: { enabled: false },
 		search: {
 			color: "#2563EB",
 			card: { color: "#60A5FA" },
@@ -400,6 +402,18 @@
 			new Function(body)();
 		});
 	}
+	function isEnabled() {
+		return !!config.get("customFn.enabled");
+	}
+	function isDisabled() {
+		return !isEnabled();
+	}
+	function enable() {
+		config.set("customFn.enabled", true);
+	}
+	function disable() {
+		config.reset("customFn.enabled");
+	}
 	var customFunctions_default = {
 		addRunnableFn,
 		registerFn,
@@ -407,7 +421,11 @@
 		getRegisteredFns,
 		removeRunnableFn,
 		removeRegisteredFn,
-		execute
+		execute,
+		isEnabled,
+		isDisabled,
+		enable,
+		disable
 	};
 	var DEFAULTS = {
 		collection: {
@@ -487,6 +505,7 @@
 			addFilter(tag, (config, { page }) => {
 				return get()[page] ?? config;
 			});
+			config.set("customSelector.enabled", true);
 			return publicSelectors;
 		}
 		function _load() {
@@ -496,7 +515,13 @@
 			return storage.get(STORAGE_KEY);
 		}
 		function hasData() {
-			return !!storage.get(STORAGE_KEY);
+			return !!get();
+		}
+		function isEnabled() {
+			return config.get("customSelector.enabled");
+		}
+		function isDisabled() {
+			return !isEnabled();
 		}
 		function save() {
 			const merged = validateAndMerge(_load(), publicSelectors);
@@ -505,19 +530,10 @@
 			return merged;
 		}
 		function enable() {
-			delete bssB2BHooks.filters[tag];
-			addFilter(tag, (config, { page }) => {
-				return get()[page] ?? config;
-			});
+			config.set("customSelector.enabled", true);
 		}
 		function disable() {
-			delete bssB2BHooks.filters[tag];
-		}
-		function destroy() {
-			publicSelectors = void 0;
-			storage.remove(STORAGE_KEY);
-			delete BSS_B2B.support.customSelectors;
-			delete bssB2BHooks.filters[tag];
+			config.reset("customSelector.enabled");
 		}
 		return {
 			get values() {
@@ -527,8 +543,9 @@
 			save,
 			enable,
 			disable,
-			destroy,
-			hasData
+			hasData,
+			isEnabled,
+			isDisabled
 		};
 	}
 	var _instance = null;
@@ -536,7 +553,7 @@
 		if (!_instance) _instance = createCustomSelectors();
 		return _instance;
 	}
-	var customSelectors = {
+	var customSelector = {
 		get values() {
 			return getInstance().values;
 		},
@@ -545,7 +562,9 @@
 		enable: () => getInstance().enable(),
 		disable: () => getInstance().disable(),
 		destroy: () => getInstance().destroy(),
-		hasData: () => getInstance().hasData()
+		hasData: () => getInstance().hasData(),
+		isEnabled: () => getInstance().isEnabled(),
+		isDisabled: () => getInstance().isDisabled()
 	};
 	function generateCode() {
 		const runnableFns = getCustomFns("runnableFns");
@@ -560,7 +579,7 @@
 			fn();
 		});
 		return `
-      const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelectors)};
+      const customSelectors = ${JSON.stringify(BSS_B2B.support.customSelector.values)};
       function configTheme(config, { page }) {
         return customSelectors[page] ?? config;
       }
@@ -760,7 +779,7 @@
 			};
 			BSS_B2B.support.search[searchId] = searchBar;
 		});
-		highlightSearch();
+		if (config.get("search.highlightElements")) highlightSearch();
 	}
 	function handleCollection() {
 		const collection = BSS_B2B.support.collection;
@@ -776,7 +795,7 @@
 			...collection,
 			...cards
 		};
-		highlightCollection();
+		if (config.get("collection.highlightElements")) highlightCollection();
 	}
 	function handleProductCards({ cardEls, uiContext }) {
 		const cards = {};
@@ -897,7 +916,7 @@
 				availableRules
 			};
 		});
-		highlightForms();
+		if (config.get("form.highlightElements")) highlightForms();
 		if (notFoundForms.length) BSS_B2B.logger.error("The following product forms are rendered on the page but not found in storage", notFoundForms);
 	}
 	function handleCart() {
@@ -938,7 +957,7 @@
 		cart.openMiniCartBtns = [...document.querySelectorAll(cartSelectors.btn_open_mini_cart)];
 		cart.checkoutEls = [...BSS_B2B.utils.getCheckoutElements()];
 		cart.addToCartBtns = [...document.querySelectorAll(cartSelectors.btn_add_to_cart)];
-		highlightCart();
+		if (config.get("cart.highlightElements")) highlightCart();
 	}
 	function highlightSearch(force = false) {
 		config.set("search.highlightElements", true);
@@ -1119,9 +1138,9 @@
 		window.BSS_B2B = window.BSS_B2B ?? {};
 		BSS_B2B.addAction = (tag, callback) => bssB2BHooks.actions[tag] = callback;
 		BSS_B2B.addFilter = (tag, callback) => bssB2BHooks.filters[tag] = callback;
-		customFunctions_default.execute();
-		if (customSelectors.hasData()) customSelectors.init();
 		const shopStorage = createStorage(Shopify.theme.schema_name);
+		if (customFunctions_default.isEnabled()) customFunctions_default.execute();
+		if (customSelector.isEnabled()) customSelector.init();
 		BSS_B2B.support = {
 			collection: {},
 			search: {},
@@ -1135,8 +1154,8 @@
 					return config.save();
 				}
 			},
-			customSelectors,
-			customFns: customFunctions_default
+			customSelector,
+			customFn: customFunctions_default
 		};
 		Object.assign(BSS_B2B.support.utils, {
 			processProductCards,
