@@ -169,7 +169,6 @@ export const customSelector = {
   save: () => getInstance().save(),
   enable: () => getInstance().enable(),
   disable: () => getInstance().disable(),
-  destroy: () => getInstance().destroy(),
   hasData: () => getInstance().hasData(),
   isEnabled: () => getInstance().isEnabled(),
   isDisabled: () => getInstance().isDisabled(),

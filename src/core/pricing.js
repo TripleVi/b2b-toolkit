@@ -1,4 +1,4 @@
-export function processProductCards() {
+export function processProductList() {
   window.dispatchEvent(new Event('scroll'));
 }
 

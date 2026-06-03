@@ -27,6 +27,7 @@ export default defineConfig({
         updateURL: 'https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js',
         supportURL: 'https://github.com/TripleVi/b2b-toolkit',
         'run-at': 'document-start',
+        exclude: ['*://cdn.shopify.com/*', '*://shop.app/*', '*://*.shop.app/*'],
       },
     }),
   ],

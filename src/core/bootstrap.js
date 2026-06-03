@@ -20,7 +20,7 @@ import { getShopifyProductLink, getShopifyVariantLink } from '../utils/shopify';
 import { createStorage } from '../utils/storage';
 import { upsertStyleTag } from '../utils/uiElements';
 import { initEventTracker } from './event-tracker';
-import { processCart, processForms, processProductCards } from './pricing';
+import { processCart, processForms, processProductList } from './pricing';
 
 export default function bootstrapApp() {
   window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
@@ -52,7 +52,7 @@ export default function bootstrapApp() {
   };
 
   Object.assign(BSS_B2B.support.utils, {
-    processProductCards,
+    processProductList,
     processCart,
     processForms,
     getShopifyProductLink,

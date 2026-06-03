@@ -363,7 +363,7 @@ export function unhighlightCollection(force = false) {
 
 export function highlightForms(force = false) {
   // if (!force && config.get('forms.highlightElements')) return;
-  config.set('forms.highlightElements', true);
+  config.set('form.highlightElements', true);
   for (const [location, locationForms] of Object.entries(
     BSS_B2B.support.forms
   )) {
@@ -381,7 +381,7 @@ export function highlightForms(force = false) {
 
 export function unhighlightForms(force = false) {
   // if (!force && !config.get('forms.highlightElements')) return;
-  config.set('forms.highlightElements', false);
+  config.set('form.highlightElements', false);
   for (const locationForms of Object.values(BSS_B2B.support.forms)) {
     for (const form of Object.values(locationForms)) {
       unhighlightEls([
