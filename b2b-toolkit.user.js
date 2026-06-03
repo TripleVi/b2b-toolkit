@@ -9,6 +9,9 @@
 // @downloadURL  https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
 // @updateURL    https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js
 // @match        https://*/*
+// @exclude      *://cdn.shopify.com/*
+// @exclude      *://shop.app/*
+// @exclude      *://*.shop.app/*
 // @grant        GM_addStyle
 // @grant        GM_deleteValue
 // @grant        GM_getValue
@@ -561,7 +564,6 @@
 		save: () => getInstance().save(),
 		enable: () => getInstance().enable(),
 		disable: () => getInstance().disable(),
-		destroy: () => getInstance().destroy(),
 		hasData: () => getInstance().hasData(),
 		isEnabled: () => getInstance().isEnabled(),
 		isDisabled: () => getInstance().isDisabled()
@@ -998,7 +1000,7 @@
 		]);
 	}
 	function highlightForms(force = false) {
-		config.set("forms.highlightElements", true);
+		config.set("form.highlightElements", true);
 		for (const [location, locationForms] of Object.entries(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) {
 			highlightEls([form.target], `form.${location}`);
 			highlightEls(form.priceEls, `form.${location}.price`);
@@ -1007,7 +1009,7 @@
 		}
 	}
 	function unhighlightForms(force = false) {
-		config.set("forms.highlightElements", false);
+		config.set("form.highlightElements", false);
 		for (const locationForms of Object.values(BSS_B2B.support.forms)) for (const form of Object.values(locationForms)) unhighlightEls([
 			form.target,
 			...form.priceEls,
@@ -1118,7 +1120,7 @@
 		}
 		BSS_B2B.logger.error("[QuickView] No product available for form", { event });
 	}
-	function processProductCards() {
+	function processProductList() {
 		window.dispatchEvent(new Event("scroll"));
 	}
 	function processForms() {
@@ -1158,7 +1160,7 @@
 			customFn: customFunctions_default
 		};
 		Object.assign(BSS_B2B.support.utils, {
-			processProductCards,
+			processProductList,
 			processCart,
 			processForms,
 			getShopifyProductLink,
