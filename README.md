@@ -24,15 +24,15 @@
    👉 [https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js](https://triplevi.github.io/b2b-toolkit/b2b-toolkit.user.js)
 2. Giao diện Tampermonkey sẽ hiện ra, nhấn nút **Install** (hoặc **Reinstall**) để hoàn tất.
 
-   ![Install](.github/assets/install3.png)
+   ![Install](.github/assets/Install3.png)
 
 3. Bật script trên website
 
-   ![Install](.github/assets/install4.png)
+   ![Install](.github/assets/Install4.png)
 
 4. Script được inject và chạy thành công trên storefront như sau:
 
-   ![Install](.github/assets/install5.png)
+   ![Install](.github/assets/Install5.png)
 
 4. Lúc này có thể truy cập tool qua namespace `BSS_B2B.support`.
 
@@ -123,6 +123,7 @@ Truy cập tính năng thông qua namespace: `BSS_B2B.support.customFn`.
 
 #### JavaScript Function Structural Breakdown
 Mã nguồn hàm custom cần phải tuân thủ nghiêm ngặt theo cấu trúc cú pháp định nghĩa hàm của JavaScript để tool có thể xử lý và thực thi ổn định:
+
 ![Function structure](.github/assets/function.png)
 
 #### Implementation Guide
