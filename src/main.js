@@ -1,4 +1,5 @@
 import bootstrapApp from './core/bootstrap';
+import { initDevMode } from './utils/support';
 
 function onB2bReady() {
   if (!window.Shopify) return;
@@ -6,7 +7,14 @@ function onB2bReady() {
   window.addEventListener('bss_b2b:module:loaded', app, { once: true });
 }
 
+function process() {
+  window.BSS_B2B = window.BSS_B2B ?? {};
+  const devMode = initDevMode();
+  window.BSS_B2B.support = { utils: { ...devMode } };
+}
+
 if (window.bssB2BHooks !== undefined) {
+  process();
   onB2bReady();
 } else {
   Object.defineProperty(window, 'bssB2BHooks', {
@@ -20,6 +28,7 @@ if (window.bssB2BHooks !== undefined) {
         enumerable: true,
       });
 
+      process();
       setTimeout(onB2bReady);
     },
 

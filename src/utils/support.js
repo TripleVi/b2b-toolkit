@@ -1,10 +1,34 @@
-BSS_B2B.support.setDeveloperMode = function () {
-  window.localStorage.developerMode = true;
-  console.log(
-    `%c[BSS_B2B LOG] window.localStorage.developerMode: ${window.localStorage.developerMode}`,
-    'color: #00aaff; font-weight: bold'
-  );
-};
+import { createStorage } from './storage';
+
+export function initDevMode() {
+  const STORAGE_KEY = 'devMode';
+  const storage = createStorage();
+  storage.exists(STORAGE_KEY) || enableDevMode();
+
+  function setDevMode(enabled) {
+    storage.set(STORAGE_KEY, enabled);
+  }
+
+  function enableDevMode() {
+    setDevMode(true);
+    BSS_B2B.logger.log('Dev mode enabled');
+  }
+
+  function disableDevMode() {
+    setDevMode(false);
+    BSS_B2B.logger.log('Dev mode disabled');
+  }
+
+  function isDevModeEnabled() {
+    return storage.get(STORAGE_KEY) === true;
+  }
+
+  function isDevModeDisabled() {
+    return !isDevModeEnabled();
+  }
+
+  return { enableDevMode, disableDevMode, isDevModeEnabled, isDevModeDisabled };
+}
 
 function getElements(selectorList, root = document) {
   return [...root.querySelectorAll(selectorList)];

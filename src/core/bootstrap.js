@@ -23,23 +23,17 @@ import { initEventTracker } from './event-tracker';
 import { processCart, processForms, processProductList } from './pricing';
 
 export default function bootstrapApp() {
-  window.bssB2BHooks = window.bssB2BHooks ?? { actions: {}, filters: {} };
-  window.BSS_B2B = window.BSS_B2B ?? {};
-  BSS_B2B.addAction = (tag, callback) => (bssB2BHooks.actions[tag] = callback);
-  BSS_B2B.addFilter = (tag, callback) => (bssB2BHooks.filters[tag] = callback);
-
   const shopStorage = createStorage(Shopify.theme.schema_name);
 
   if (customFn.isEnabled()) customFn.execute();
 
   if (customSelector.isEnabled()) customSelector.init();
 
-  BSS_B2B.support = {
+  Object.assign(BSS_B2B.support, {
     collection: {},
     search: {},
     forms: {},
     cart: {},
-    utils: {},
     shopStorage,
     configs: {
       values: config.publicConfig,
@@ -49,7 +43,7 @@ export default function bootstrapApp() {
     },
     customSelector,
     customFn,
-  };
+  });
 
   Object.assign(BSS_B2B.support.utils, {
     processProductList,

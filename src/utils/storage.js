@@ -1,4 +1,4 @@
-export function createStorage(namespace = 'app', storage = localStorage) {
+export function createStorage(namespace = 'b2b-toolkit', storage = localStorage) {
   function buildKey(key) {
     return `${namespace}:${key}`;
   }
