@@ -3,7 +3,8 @@ import { createStorage } from './storage';
 export function initDevMode() {
   const STORAGE_KEY = 'devMode';
   const storage = createStorage();
-  storage.exists(STORAGE_KEY) || enableDevMode();
+
+  storage.exists(STORAGE_KEY) || setDevMode(true);
 
   function setDevMode(enabled) {
     storage.set(STORAGE_KEY, enabled);

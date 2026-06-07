@@ -85,6 +85,11 @@ export default function bootstrapApp() {
   `
   );
 
+  const storage = createStorage();
+  BSS_B2B.logger.log(
+    `Dev mode ${storage.get('devMode') ? 'enabled' : 'disabled'}`
+  );
+
   return () => {
     initEventTracker();
     handleSearch();
