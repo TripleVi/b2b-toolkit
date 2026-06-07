@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B2B Toolkit
 // @namespace    https://github.com/TripleVi/b2b-toolkit
-// @version      0.1.0
+// @version      0.1.1
 // @author       TripleVi
 // @description  Internal support toolkit for B2B Solution
 // @icon         https://vitejs.dev/logo.svg
@@ -18,7 +18,7 @@
 
 (function() {
   'use strict';
-	function createStorage(namespace = "app", storage = localStorage) {
+	function createStorage(namespace = "b2b-toolkit", storage = localStorage) {
 		function buildKey(key) {
 			return `${namespace}:${key}`;
 		}
@@ -1129,22 +1129,14 @@
 		document.dispatchEvent(new Event("bss_b2b:CustomCartUpdate"));
 	}
 	function bootstrapApp() {
-		window.bssB2BHooks = window.bssB2BHooks ?? {
-			actions: {},
-			filters: {}
-		};
-		window.BSS_B2B = window.BSS_B2B ?? {};
-		BSS_B2B.addAction = (tag, callback) => bssB2BHooks.actions[tag] = callback;
-		BSS_B2B.addFilter = (tag, callback) => bssB2BHooks.filters[tag] = callback;
 		const shopStorage = createStorage(Shopify.theme.schema_name);
 		if (customFunctions_default.isEnabled()) customFunctions_default.execute();
 		if (customSelector.isEnabled()) customSelector.init();
-		BSS_B2B.support = {
+		Object.assign(BSS_B2B.support, {
 			collection: {},
 			search: {},
 			forms: {},
 			cart: {},
-			utils: {},
 			shopStorage,
 			configs: {
 				values: config.publicConfig,
@@ -1154,7 +1146,7 @@
 			},
 			customSelector,
 			customFn: customFunctions_default
-		};
+		});
 		Object.assign(BSS_B2B.support.utils, {
 			processProductList,
 			processCart,
@@ -1174,7 +1166,7 @@
 			unhighlightForms,
 			unhighlightCart
 		});
-		console.log("%c 🛠️ B2B Toolkit v0.1.0 %c by LV ✨", `
+		console.log("%c 🛠️ B2B Toolkit v0.1.1 %c by LV ✨", `
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 8px 12px;
@@ -1197,13 +1189,48 @@
 			handleForms();
 		};
 	}
+	function initDevMode() {
+		const STORAGE_KEY = "devMode";
+		const storage = createStorage();
+		storage.exists(STORAGE_KEY) || enableDevMode();
+		function setDevMode(enabled) {
+			storage.set(STORAGE_KEY, enabled);
+		}
+		function enableDevMode() {
+			setDevMode(true);
+			BSS_B2B.logger.log("Dev mode enabled");
+		}
+		function disableDevMode() {
+			setDevMode(false);
+			BSS_B2B.logger.log("Dev mode disabled");
+		}
+		function isDevModeEnabled() {
+			return storage.get(STORAGE_KEY) === true;
+		}
+		function isDevModeDisabled() {
+			return !isDevModeEnabled();
+		}
+		return {
+			enableDevMode,
+			disableDevMode,
+			isDevModeEnabled,
+			isDevModeDisabled
+		};
+	}
 	function onB2bReady() {
 		if (!window.Shopify) return;
 		const app = bootstrapApp();
 		window.addEventListener("bss_b2b:module:loaded", app, { once: true });
 	}
-	if (window.bssB2BHooks !== void 0) onB2bReady();
-	else Object.defineProperty(window, "bssB2BHooks", {
+	function process() {
+		window.BSS_B2B = window.BSS_B2B ?? {};
+		const devMode = initDevMode();
+		window.BSS_B2B.support = { utils: { ...devMode } };
+	}
+	if (window.bssB2BHooks !== void 0) {
+		process();
+		onB2bReady();
+	} else Object.defineProperty(window, "bssB2BHooks", {
 		configurable: true,
 		set(value) {
 			Object.defineProperty(window, "bssB2BHooks", {
@@ -1212,6 +1239,7 @@
 				configurable: true,
 				enumerable: true
 			});
+			process();
 			setTimeout(onB2bReady);
 		},
 		get() {}
