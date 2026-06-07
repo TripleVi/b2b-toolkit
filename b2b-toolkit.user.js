@@ -1181,6 +1181,8 @@
     font-size: 13px;
     font-weight: 600;
   `);
+		const storage = createStorage();
+		BSS_B2B.logger.log(`Dev mode ${storage.get("devMode") ? "enabled" : "disabled"}`);
 		return () => {
 			initEventTracker();
 			handleSearch();
@@ -1192,7 +1194,7 @@
 	function initDevMode() {
 		const STORAGE_KEY = "devMode";
 		const storage = createStorage();
-		storage.exists(STORAGE_KEY) || enableDevMode();
+		storage.exists(STORAGE_KEY) || setDevMode(true);
 		function setDevMode(enabled) {
 			storage.set(STORAGE_KEY, enabled);
 		}
