@@ -18,7 +18,7 @@ export default defineConfig({
         name: 'B2B Toolkit',
         icon: 'https://vitejs.dev/logo.svg',
         namespace: 'https://github.com/TripleVi/b2b-toolkit',
-        version: '0.1.0',
+        version: '0.1.1',
         description: 'Internal support toolkit for B2B Solution',
         author: 'TripleVi',
         match: ['https://*/*'],

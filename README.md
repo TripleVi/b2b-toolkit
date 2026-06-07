@@ -1,6 +1,6 @@
 # B2B Toolkit
 
-[![Version](https://img.shields.io/badge/version-v0.1.0-blue.svg)](https://github.com/TripleVi/b2b-toolkit)
+[![Version](https://img.shields.io/badge/version-v0.1.1-blue.svg)](https://github.com/TripleVi/b2b-toolkit)
 [![Platform](https://img.shields.io/badge/platform-Tampermonkey-emerald.svg)](https://www.tampermonkey.net/)
 
 **B2B Toolkit** là một userscript (internal support toolkit) được phát triển nhằm hỗ trợ đội ngũ kỹ thuật và support trong việc debug, kiểm tra và tối ưu hiển thị của ứng dụng BSS B2B trên giao diện Storefront của Shopify.
