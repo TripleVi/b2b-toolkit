@@ -1182,7 +1182,7 @@
     font-weight: 600;
   `);
 		const storage = createStorage();
-		BSS_B2B.logger.log(`Dev mode ${storage.get("devMode") ? "enabled" : "disabled"}`);
+		console.log(`%c[bss.b2b] Dev mode ${storage.get("devMode") ? "enabled" : "disabled"}`, "color: pink; font-weight: 600; font-style: italic;");
 		return () => {
 			initEventTracker();
 			handleSearch();
