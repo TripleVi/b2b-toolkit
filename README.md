@@ -12,12 +12,15 @@
 ### Step 1: Install Tampermonkey Extension
 1. Truy cập Web Store trên trình duyệt của bạn (Chrome, Edge, Brave...) và tìm kiếm **Tampermonkey**.
 2. Chọn **Add to Chrome** (hoặc trình duyệt tương ứng) để cài đặt.
-![Install](.github/assets/install.png)
+
+   ![Install](.github/assets/install.png)
+
 3. **Cấu hình quan trọng cho Extension:**
    * Vào phần quản lý Extension của trình duyệt $\rightarrow$ Chọn **Tampermonkey** $\rightarrow$ **Details**.
    * Tại mục **Site access**, chọn `On all sites`.
    * Bật tùy chọn **Allow User Scripts** (cho phép chạy mã nguồn chưa được kiểm duyệt bởi store nếu có cảnh báo bảo mật).
-![Install](.github/assets/install2.png)
+
+   ![Install](.github/assets/install2.png)
 
 ### Step 2: Install B2B Toolkit Script
 1. Click trực tiếp vào đường dẫn cài đặt script tự động sau:
@@ -43,7 +46,7 @@
 ## Features
 
 ### 1. Highlight Elements & Quick Info
-Tự động quét và đóng khung (highlight) các phần tử BSS-selectors phổ biến trên Storefront như: *Product List, Product Form, Cart, Mini Cart, Search Bar, Quick View...*
+Tự động quét và highlight các phần tử bss-b2b-selectors phổ biến trên Storefront như: *Product List, Product Form, Mini Cart, Main Cart, Search Bar, Quick View...*
 * **Hover Badge:** Khi di chuột vào các phần tử được highlight sẽ hiển thị badge ở trên đầu tóm tắt thông tin sản phẩm và pricing rule được áp dụng. Có thể truy cập trực tiếp vào Shopify admin.
 
    ![Highlight collection](.github/assets/highlight_collection.png)
@@ -51,6 +54,10 @@ Tự động quét và đóng khung (highlight) các phần tử BSS-selectors p
 * **Console Log Info:** Khi bấm vào **biểu tượng chữ "i" (info icon)** trên badge, hệ thống sẽ log toàn bộ dữ liệu chi tiết của target đó ra tab Console (bao gồm: `availableRules`, `appliedRules`, `currVariant`, `priceEls`, `related elements`...).
 
    ![Log info](.github/assets/log_info.png)
+
+Notes:
+* Với product list, phải set attribute `bss-b2b-product-qb-id` cho product card để có thể query elements.
+* Phần rule info hiện tại mới xử lý cho CP, PL, VP and TD.
 
 Tương tự cho search bar,
 
@@ -79,17 +86,18 @@ Vì app phải tương thích với theme nên không biết khi nào các varia
 
 ![Event tracker](.github/assets/event_tracker.png)
 
-### 3. Custom Selector
-Hỗ trợ cài đặt trực tiếp bằng JavaScript từ Console mà không cần chỉnh sửa trong Dev Hub. Chỉ cần cung cấp selector tương ứng. Mọi cấu hình vẫn đi qua hook filter `custom:config_theme/installation`.
+### 3. Inline Install
+Hỗ trợ install Pricing Module trực tiếp bằng JavaScript từ DevTools Console, không cần sandbox. Chỉ cần cung cấp selector tương ứng. Mọi thứ vẫn đi qua hook `custom:config_theme/installation`.
 
 Truy cập tính năng thông qua namespace: `BSS_B2B.support.customSelector`.
 
-1. Khởi tạo custom selectors:
+1. Init custom selectors:
    ```javascript
    BSS_B2B.support.customSelector.init()
    ```
    ![Custom selector](.github/assets/customSelector.png)
-2. Gán giá trị mới cho một component (Ví dụ với `collection`):
+
+2. Gán giá trị mới cho một component (e.g., `collection`):
    ```javascript
    BSS_B2B.support.customSelector.values.collection = {
        "selectorCard": ":not(*)",
@@ -98,7 +106,7 @@ Truy cập tính năng thông qua namespace: `BSS_B2B.support.customSelector`.
        "selectorSearchBar": ":not(*)"
    }
    ```
-3. Lưu lại vào Storage và gọi hàm tương ứng để xử lý và hiển thị lại giá:
+3. Save values to local storage và gọi function tương ứng để process prices:
    ```javascript
    BSS_B2B.support.customSelector.save()
    BSS_B2B.support.utils.processProductList()
@@ -107,27 +115,27 @@ Truy cập tính năng thông qua namespace: `BSS_B2B.support.customSelector`.
 #### API Reference: `customSelector`
 | Function / Property | Description |
 | :--- | :--- |
-| `values` | Read or write the current custom selectors state object. |
-| `init()` | Initialize custom selectors structures and commit them to active storage. |
-| `disable()` | Disable the automated selector installation process. |
-| `enable()` | Enable the automated selector installation process. |
-| `isEnabled()` | Returns a boolean value indicating if automated installation is currently enabled. |
-| `isDisabled()` | Returns a boolean value indicating if automated installation is currently disabled. |
-| `save()` | Save all modified custom selector adjustments safely into storage. |
-| `hasData()` | Returns a boolean value checking if custom selector structures currently exist in storage. |
+| `values` | Reads or writes the current custom selectors state object. |
+| `init()` | Sets up the feature. |
+| `disable()` | Disables the feature. |
+| `enable()` | Enables the feature. |
+| `isEnabled()` | Checks whether the feature is enabled. |
+| `isDisabled()` | Checks whether the feature is disabled. |
+| `save()` | Saves the modified custom selectors to storage. |
+| `hasData()` | Checks whether custom selectors currently exist in storage. |
 
-### 4. Custom Function
-Hỗ trợ register and execute các đoạn code tùy biến ngay khi công cụ bắt đầu chạy, giúp inject nhanh các đoạn script test hoặc custom handler.
+### 4. Inline Functions
+Hỗ trợ register and execute các đoạn code tùy biến ngay khi tool bắt đầu chạy, giúp inject nhanh các đoạn script test hoặc custom handler.
 
 Truy cập tính năng thông qua namespace: `BSS_B2B.support.customFn`.
 
 #### JavaScript Function Structural Breakdown
-Mã nguồn hàm custom cần phải tuân thủ nghiêm ngặt theo cấu trúc cú pháp định nghĩa hàm của JavaScript để tool có thể xử lý và thực thi ổn định:
+Cú pháp function phải tuân thủ nghiêm ngặt cấu trúc dưới đây để tool có thể xử lý và thực thi một cách ổn định.
 
 ![Function structure](.github/assets/function.png)
 
 #### Implementation Guide
-1. Đầu tiên cần enable tính năng custom function:
+1. Đầu tiên, cần bật tính năng này khi truy cập site lần đầu:
    ```javascript
    BSS_B2B.support.customFn.enable()
    ```
@@ -136,23 +144,23 @@ Mã nguồn hàm custom cần phải tuân thủ nghiêm ngặt theo cấu trúc
 
    ![Custom function](.github/assets/customFn.png)
 
-4. Sau đó tiến hành **F5 / Reload** lại website storefront để xem kết quả logs chạy hàm trong tab Developer Console.
+4. Sau đó tiến hành **F5 / Reload** lại website để xem kết quả logs chạy hàm trong tab Developer Console.
 
    ![Custom function](.github/assets/customFn2.png)
 
 #### API Reference: `customFn`
 | Function / Property | Description |
 | :--- | :--- |
-| `registerFn(fn)` | Registers a named function into the global scope. |
-| `addRunnableFn(fn)` | Appends a function block that executes instantly when the tool launches. |
-| `getRegisteredFns()` | Retrieves an array containing all currently registered function blocks. |
-| `getRunnableFns()` | Retrieves an array containing all currently configured runnable execution structures. |
-| `removeRegisteredFn(name)`| Removes a previously declared function block by its string name parameter. |
-| `removeRunnableFn(name)`  | Removes an existing runtime runnable entry loop by its matching name parameter. |
-| `enable()` | Toggles the custom function features execution subsystem to Active. |
-| `disable()` | Toggles the custom function features execution subsystem to Inactive. |
-| `isEnabled()` | Returns a boolean checking if the custom function engine is actively processing inputs. |
-| `isDisabled()` | Returns a boolean checking if the custom function engine is currently turned off. |
+| `registerFn(fn)` | Registers a function in the global scope. |
+| `addRunnableFn(fn)` | Adds a function to run on launch. |
+| `getRegisteredFns()` | Gets all registered functions. |
+| `getRunnableFns()` | Gets all runnable functions. |
+| `removeRegisteredFn(name)`| Remove a registered function by name. |
+| `removeRunnableFn(name)`  | Remove a runnable function by name. |
+| `enable()` | Enables the feature. |
+| `disable()` | Disables the feature. |
+| `isEnabled()` | Checks whether the feature is enabled. |
+| `isDisabled()` | Checks whether the feature is disabled. |
 
 ### 5. Tool Configs
 Xem và điều chỉnh trực tiếp các cấu hình cốt lõi của hệ thống toolkit (ví dụ: mã màu highlight, bật/tắt highlight của từng cấu phần chi tiết...).
@@ -177,17 +185,27 @@ Cung cấp các hàm tiện ích tính toán, bật/tắt hoặc re-process hi�
 #### API Reference: `utils`
 | Function / Property | Description |
 | :--- | :--- |
-| `processProductList()` | Triggers a baseline scan to refresh, process, and recalculate catalog arrays. |
-| `processForms()` | Forces price calculation injections over mapped standard product page forms. |
-| `processCart()` | Invalidates and force-updates standard and localized cart row lines. |
-| `highlightSearch()` | Targets, overrides, and updates structural markers for search panels. |
-| `highlightCollection()` | Highlights product lists matching active variants. |
-| `highlightForms()` | Binds highlight borders over tracked buying forms. |
-| `highlightCart()` | Isolates and borders active line-item properties within cart nodes. |
-| `unhighlightSearch()` | Removes highlight boxes and resets state from active search components. |
-| `unhighlightCollection()` | Removes highlight boxes and resets state from catalog/collection lists. |
-| `unhighlightForms()` | Removes highlight boxes and resets state from standard checkout product forms. |
-| `unhighlightCart()` | Removes highlight boxes and resets state from cart node elements. |
+| `enableDevMode` | Enables developer mode. |
+| `disableDevMode()` | Disables developer mode. |
+| `isDevModeEnabled()` | Checks whether developer mode is enabled. |
+| `isDevModeDisabled()` | Checks whether developer mode is disabled. |
+| `processProductList()` | Reprocesses pricing for product lists. |
+| `processForms()` | Reprocesses pricing for product forms. |
+| `processCart()` | Reprocesses pricing for cart items. |
+| `highlightSearch()` | Highlights search elements. |
+| `highlightCollection()` | Highlights collection elements. |
+| `highlightForms()` | Highlights product form elements. |
+| `highlightCart()` | Highlights cart elements. |
+| `unhighlightSearch()` | Removes search highlights. |
+| `unhighlightCollection()` | Removes collection highlights. |
+| `unhighlightForms()` | Removes product form highlights. |
+| `unhighlightCart()` | Removes cart highlights. |
+
+Here's an example of using dev mode in the sandbox:
+```javascript
+if (BSS_B2B.support.utils.isDevModeDisabled()) return;
+// Code here
+```
 
 ---
 
